@@ -16,6 +16,7 @@ export enum LLMProvider {
   Gemini = 'Google Gemini',
   OpenAI = 'OpenAI',
   OpenRouter = 'OpenRouter',
+  Anthropic = 'Anthropic',
 }
 
 export enum RedTeamRole {

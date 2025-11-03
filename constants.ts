@@ -3,7 +3,7 @@ import { Team, Language, RedTeamRole, BlueTeamRole, LLMProvider, SystemTeamRole,
 
 export const TEAMS = [Team.System, Team.Red, Team.Blue];
 export const LANGUAGES = [Language.Python, Language.JavaScript, Language.Go, Language.Rust];
-export const LLM_PROVIDERS = [LLMProvider.Gemini, LLMProvider.OpenAI, LLMProvider.OpenRouter];
+export const LLM_PROVIDERS = [LLMProvider.Gemini, LLMProvider.OpenAI, LLMProvider.OpenRouter, LLMProvider.Anthropic];
 
 // A programmatically generated SVG gear logo, themed to match the app.
 // This is a self-contained data URL, making the app portable.

@@ -1,106 +1,99 @@
 
-import { GoogleGenAI, Type } from "@google/genai";
 import { AgentProfile, Team, AgentRole, Language, LLMProvider, SystemTeamRole, CustomTool, AgentV1, LanguageV1, ExecutionV1, ModelV1, PromptsV1, ToolV1, MemoryV1, EnvV1, TestV1, AgentStatus } from '../types';
+import { createLLMProvider } from './llmService';
 
-const API_KEY = process.env.API_KEY;
-
-if (!API_KEY) {
-  console.error("API_KEY environment variable not set.");
-}
-
-const ai = new GoogleGenAI({ apiKey: API_KEY! });
-
+// JSON Schema definitions (converted from Google Type enum to standard JSON Schema)
 const toolParameterSchema = {
-    type: Type.OBJECT,
+    type: "object",
     properties: {
-        type: { type: Type.STRING },
-        description: { type: Type.STRING }
+        type: { type: "string" },
+        description: { type: "string" }
     }
 };
 
 const toolSchemaV1 = {
-    type: Type.OBJECT,
+    type: "object",
     properties: {
-        name: { type: Type.STRING },
-        description: { type: Type.STRING },
+        name: { type: "string" },
+        description: { type: "string" },
         inputSchema: {
-            type: Type.OBJECT,
+            type: "object",
             properties: {
-                type: { type: Type.STRING, description: "Should always be 'object'" },
+                type: { type: "string", description: "Should always be 'object'" },
                 properties: {
-                    type: Type.OBJECT,
+                    type: "object",
                     properties: {},
                     additionalProperties: toolParameterSchema
                 },
-                required: { type: Type.ARRAY, items: { type: Type.STRING }, nullable: true }
+                required: { type: "array", items: { type: "string" } }
             }
         },
-        requiresAuth: { type: Type.BOOLEAN, nullable: true },
-        authVars: { type: Type.ARRAY, items: { type: Type.STRING }, nullable: true }
+        requiresAuth: { type: "boolean" },
+        authVars: { type: "array", items: { type: "string" } }
     },
     required: ['name', 'description', 'inputSchema']
 };
 
 const agentV1Schema = {
-    type: Type.OBJECT,
+    type: "object",
     properties: {
-        schemaVersion: { type: Type.STRING, description: "MUST be 'agent.v1'" },
-        id: { type: Type.STRING, description: "A unique, kebab-case identifier for the agent, e.g., 'red-team-recon-scout'." },
-        name: { type: Type.STRING, description: "A human-readable name, e.g., 'Red Team Recon Scout'." },
-        version: { type: Type.STRING, description: "The semantic version of this agent, e.g., '1.0.0'." },
-        description: { type: Type.STRING },
-        author: { type: Type.STRING, description: "The author of the agent, always 'Transform Army AI'." },
+        schemaVersion: { type: "string", description: "MUST be 'agent.v1'" },
+        id: { type: "string", description: "A unique, kebab-case identifier for the agent, e.g., 'red-team-recon-scout'." },
+        name: { type: "string", description: "A human-readable name, e.g., 'Red Team Recon Scout'." },
+        version: { type: "string", description: "The semantic version of this agent, e.g., '1.0.0'." },
+        description: { type: "string" },
+        author: { type: "string", description: "The author of the agent, always 'Transform Army AI'." },
         language: {
-            type: Type.OBJECT,
-            properties: { name: { type: Type.STRING }, version: { type: Type.STRING } }
+            type: "object",
+            properties: { name: { type: "string" }, version: { type: "string" } }
         },
         execution: {
-            type: Type.OBJECT,
+            type: "object",
             properties: {
-                kind: { type: Type.STRING, description: "e.g., 'process' or 'http'" },
-                command: { type: Type.STRING, nullable: true },
-                args: { type: Type.ARRAY, items: { type: Type.STRING }, nullable: true }
+                kind: { type: "string", description: "e.g., 'process' or 'http'" },
+                command: { type: "string" },
+                args: { type: "array", items: { type: "string" } }
             }
         },
         model: {
-            type: Type.OBJECT,
+            type: "object",
             properties: {
-                provider: { type: Type.STRING },
-                modelId: { type: Type.STRING },
-                temperature: { type: Type.NUMBER }
+                provider: { type: "string" },
+                modelId: { type: "string" },
+                temperature: { type: "number" }
             }
         },
         prompts: {
-            type: Type.OBJECT,
-            properties: { system: { type: Type.STRING, description: "The complete, detailed system prompt for the agent." } }
+            type: "object",
+            properties: { system: { type: "string", description: "The complete, detailed system prompt for the agent." } }
         },
-        tools: { type: Type.ARRAY, items: toolSchemaV1 },
+        tools: { type: "array", items: toolSchemaV1 },
         memory: {
-            type: Type.OBJECT,
+            type: "object",
             properties: {
-                mode: { type: Type.STRING },
-                provider: { type: Type.STRING },
-                binding: { type: Type.STRING },
-                notes: { type: Type.STRING, nullable: true }
+                mode: { type: "string" },
+                provider: { type: "string" },
+                binding: { type: "string" },
+                notes: { type: "string" }
             }
         },
         env: {
-            type: Type.OBJECT,
+            type: "object",
             properties: {
-                required: { type: Type.ARRAY, items: { type: Type.STRING } },
-                optional: { type: Type.ARRAY, items: { type: Type.STRING } }
+                required: { type: "array", items: { type: "string" } },
+                optional: { type: "array", items: { type: "string" } }
             }
         },
         tests: {
-            type: Type.ARRAY,
+            type: "array",
             items: {
-                type: Type.OBJECT,
+                type: "object",
                 properties: {
-                    name: { type: Type.STRING },
-                    description: { type: Type.STRING },
-                    type: { type: Type.STRING, description: "MUST be 'smoke'" },
-                    command: { type: Type.STRING, nullable: true },
-                    expectedOutput: { type: Type.STRING, nullable: true }
+                    name: { type: "string" },
+                    description: { type: "string" },
+                    type: { type: "string", description: "MUST be 'smoke'" },
+                    command: { type: "string" },
+                    expectedOutput: { type: "string" }
                 }
             }
         }
@@ -109,7 +102,10 @@ const agentV1Schema = {
 };
 
 const getBasePrompt = (team: Team, role: AgentRole, language: Language, llmProvider: LLMProvider, modelName: string, customTools: ToolV1[]) => {
-  const defaultModelId = llmProvider === LLMProvider.Gemini ? 'gemini-2.5-pro' : llmProvider === LLMProvider.OpenAI ? 'gpt-4o' : 'mistralai/mixtral-8x7b-instruct';
+  const defaultModelId = llmProvider === LLMProvider.Gemini ? 'gemini-2.5-pro' : 
+                         llmProvider === LLMProvider.OpenAI ? 'gpt-4o' : 
+                         llmProvider === LLMProvider.OpenRouter ? 'mistralai/mistral-large' :
+                         llmProvider === LLMProvider.Anthropic ? 'claude-3-5-sonnet-20241022' : 'gpt-4o';
   const finalModelName = modelName.trim() || defaultModelId;
   const languageVersion = language === Language.Python ? "3.11" : language === Language.JavaScript ? "20.x" : language === Language.Go ? "1.22" : "1.77";
 
@@ -174,17 +170,21 @@ export const generateAgent = async (
   const prompt = getBasePrompt(team, role, language, llmProvider, modelName, customToolsV1);
 
   try {
-    const response = await ai.models.generateContent({
-        model: 'gemini-2.5-pro',
-        contents: { parts: [{ text: prompt }] },
-        config: {
-            responseMimeType: "application/json",
-            responseSchema: agentV1Schema,
-            temperature: 0.7,
-        }
-    });
+    // Create the appropriate LLM provider
+    const llmProviderInstance = createLLMProvider(llmProvider, modelName);
     
-    const jsonText = response.text.trim();
+    if (!llmProviderInstance) {
+      throw new Error(`Failed to create LLM provider for ${llmProvider}. Please check your API keys.`);
+    }
+
+    console.log(`Using ${llmProviderInstance.getName()} for agent generation...`);
+    
+    const jsonText = await llmProviderInstance.generateStructuredOutput(
+      prompt,
+      agentV1Schema,
+      { temperature: 0.7 }
+    );
+    
     const agentManifest: AgentV1 = JSON.parse(jsonText);
 
     const avatarBase64 = await generateAvatar(team, role);
@@ -229,16 +229,21 @@ export const normalizeAgent = async (foreignManifestJson: string): Promise<Agent
     `;
 
     try {
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-pro',
-            contents: { parts: [{ text: prompt }] },
-            config: {
-                responseMimeType: "application/json",
-                responseSchema: agentV1Schema,
-            }
-        });
+        // Use default provider (Gemini) for normalization
+        const llmProviderInstance = createLLMProvider(LLMProvider.Gemini, 'gemini-2.5-pro');
+        
+        if (!llmProviderInstance) {
+          throw new Error('Failed to create LLM provider for normalization. Please check your API keys.');
+        }
 
-        const jsonText = response.text.trim();
+        console.log(`Using ${llmProviderInstance.getName()} for manifest normalization...`);
+        
+        const jsonText = await llmProviderInstance.generateStructuredOutput(
+          prompt,
+          agentV1Schema,
+          { temperature: 0.5 }
+        );
+        
         const normalizedManifest: AgentV1 = JSON.parse(jsonText);
 
         // Determine Team/Role from manifest for UI purposes

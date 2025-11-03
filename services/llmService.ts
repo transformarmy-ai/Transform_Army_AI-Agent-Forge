@@ -1,0 +1,334 @@
+import { LLMProvider } from '../types';
+
+// Common interface for all LLM providers
+export interface LLMResponse {
+  text: string;
+  model?: string;
+}
+
+export interface LLMConfig {
+  temperature?: number;
+  maxTokens?: number;
+}
+
+export interface LLMProviderInterface {
+  generateStructuredOutput(
+    prompt: string,
+    schema: any,
+    config?: LLMConfig
+  ): Promise<string>;
+  getName(): string;
+}
+
+// Helper function to convert Google GenAI Type enum to JSON Schema
+function convertGoogleSchemaToJSONSchema(schema: any): any {
+  if (typeof schema !== 'object' || schema === null) {
+    return schema;
+  }
+
+  // Convert Type enum values to strings
+  const typeMap: { [key: string]: string } = {
+    'OBJECT': 'object',
+    'STRING': 'string',
+    'ARRAY': 'array',
+    'NUMBER': 'number',
+    'BOOLEAN': 'boolean',
+  };
+
+  const converted = { ...schema };
+
+  // Convert type enum if present
+  if (converted.type && typeof converted.type === 'string') {
+    converted.type = typeMap[converted.type] || converted.type;
+  }
+
+  // Recursively convert nested objects
+  if (converted.properties) {
+    const newProps: any = {};
+    for (const [key, value] of Object.entries(converted.properties)) {
+      newProps[key] = convertGoogleSchemaToJSONSchema(value);
+    }
+    converted.properties = newProps;
+  }
+
+  if (converted.items) {
+    converted.items = convertGoogleSchemaToJSONSchema(converted.items);
+  }
+
+  if (converted.additionalProperties) {
+    converted.additionalProperties = convertGoogleSchemaToJSONSchema(converted.additionalProperties);
+  }
+
+  return converted;
+}
+
+// OpenAI Provider
+export class OpenAIProvider implements LLMProviderInterface {
+  private apiKey: string;
+  private modelId: string;
+
+  constructor(apiKey: string, modelId: string = 'gpt-4o') {
+    this.apiKey = apiKey;
+    this.modelId = modelId;
+  }
+
+  getName(): string {
+    return 'OpenAI';
+  }
+
+  async generateStructuredOutput(
+    prompt: string,
+    schema: any,
+    config?: LLMConfig
+  ): Promise<string> {
+    try {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: this.modelId,
+          messages: [{ role: 'user', content: prompt }],
+          response_format: { type: 'json_schema', schema: convertGoogleSchemaToJSONSchema(schema) },
+          temperature: config?.temperature ?? 0.7,
+          max_tokens: config?.maxTokens ?? 4096,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`OpenAI API error: ${response.status} - ${error}`);
+      }
+
+      const data = await response.json();
+      return data.choices[0].message.content.trim();
+    } catch (error) {
+      console.error('OpenAI provider error:', error);
+      throw new Error(`Failed to generate content with OpenAI: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+}
+
+// Anthropic Claude Provider
+export class AnthropicProvider implements LLMProviderInterface {
+  private apiKey: string;
+  private modelId: string;
+
+  constructor(apiKey: string, modelId: string = 'claude-3-5-sonnet-20241022') {
+    this.apiKey = apiKey;
+    this.modelId = modelId;
+  }
+
+  getName(): string {
+    return 'Anthropic Claude';
+  }
+
+  async generateStructuredOutput(
+    prompt: string,
+    schema: any,
+    config?: LLMConfig
+  ): Promise<string> {
+    try {
+      // Anthropic doesn't support structured outputs like OpenAI yet, so we request JSON mode
+      const enhancedPrompt = `${prompt}\n\nIMPORTANT: You must respond with ONLY valid JSON that matches this schema. Do not include any other text or markdown formatting.`;
+
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'x-api-key': this.apiKey,
+          'anthropic-version': '2023-06-01',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: this.modelId,
+          max_tokens: config?.maxTokens ?? 4096,
+          temperature: config?.temperature ?? 0.7,
+          messages: [{ role: 'user', content: enhancedPrompt }],
+          system: `You are a JSON generation assistant. Always respond with valid JSON only, no markdown, no explanations. Schema requirements: ${JSON.stringify(schema)}`,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`Anthropic API error: ${response.status} - ${error}`);
+      }
+
+      const data = await response.json();
+      const text = data.content[0].text.trim();
+      
+      // Remove markdown code blocks if present
+      return text.replace(/^```json\n/, '').replace(/```$/, '').trim();
+    } catch (error) {
+      console.error('Anthropic provider error:', error);
+      throw new Error(`Failed to generate content with Anthropic: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+}
+
+// OpenRouter Provider
+export class OpenRouterProvider implements LLMProviderInterface {
+  private apiKey: string;
+  private modelId: string;
+
+  constructor(apiKey: string, modelId: string = 'mistralai/mistral-large') {
+    this.apiKey = apiKey;
+    this.modelId = modelId;
+  }
+
+  getName(): string {
+    return 'OpenRouter';
+  }
+
+  async generateStructuredOutput(
+    prompt: string,
+    schema: any,
+    config?: LLMConfig
+  ): Promise<string> {
+    try {
+      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: this.modelId,
+          messages: [{ role: 'user', content: prompt }],
+          response_format: { type: 'json_schema', schema: convertGoogleSchemaToJSONSchema(schema) },
+          temperature: config?.temperature ?? 0.7,
+          max_tokens: config?.maxTokens ?? 4096,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`OpenRouter API error: ${response.status} - ${error}`);
+      }
+
+      const data = await response.json();
+      return data.choices[0].message.content.trim();
+    } catch (error) {
+      console.error('OpenRouter provider error:', error);
+      throw new Error(`Failed to generate content with OpenRouter: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+}
+
+// Gemini Provider (using REST API directly)
+export class GeminiProvider implements LLMProviderInterface {
+  private apiKey: string;
+  private modelId: string;
+
+  constructor(apiKey: string, modelId: string = 'gemini-2.5-pro') {
+    this.apiKey = apiKey;
+    this.modelId = modelId;
+  }
+
+  getName(): string {
+    return 'Google Gemini';
+  }
+
+  async generateStructuredOutput(
+    prompt: string,
+    schema: any,
+    config?: LLMConfig
+  ): Promise<string> {
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${this.modelId}:generateContent?key=${this.apiKey}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: {
+              responseMimeType: 'application/json',
+              responseSchema: schema,
+              temperature: config?.temperature ?? 0.7,
+              maxOutputTokens: config?.maxTokens ?? 4096,
+            },
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`Gemini API error: ${response.status} - ${error}`);
+      }
+
+      const data = await response.json();
+      return data.candidates[0].content.parts[0].text.trim();
+    } catch (error) {
+      console.error('Gemini provider error:', error);
+      throw new Error(`Failed to generate content with Gemini: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+}
+
+// Factory function to create the appropriate provider
+export function createLLMProvider(
+  provider: LLMProvider,
+  modelName: string = ''
+): LLMProviderInterface | null {
+  const config = getProviderConfig(provider, modelName);
+  if (!config.apiKey) {
+    console.warn(`No API key configured for ${provider}`);
+    return null;
+  }
+
+  switch (provider) {
+    case LLMProvider.Gemini:
+      return new GeminiProvider(config.apiKey, config.modelId);
+    case LLMProvider.OpenAI:
+      return new OpenAIProvider(config.apiKey, config.modelId);
+    case LLMProvider.OpenRouter:
+      return new OpenRouterProvider(config.apiKey, config.modelId);
+    case LLMProvider.Anthropic:
+      return new AnthropicProvider(config.apiKey, config.modelId);
+    default:
+      console.error(`Unsupported LLM provider: ${provider}`);
+      return null;
+  }
+}
+
+// Helper function to get API keys and model IDs from environment
+function getProviderConfig(provider: LLMProvider, modelName: string): { apiKey: string; modelId: string } {
+  const getDefaultModel = () => {
+    switch (provider) {
+      case LLMProvider.Gemini: return 'gemini-2.5-pro';
+      case LLMProvider.OpenAI: return 'gpt-4o';
+      case LLMProvider.OpenRouter: return 'mistralai/mistral-large';
+      case LLMProvider.Anthropic: return 'claude-3-5-sonnet-20241022';
+      default: return '';
+    }
+  };
+
+  let apiKey = '';
+  switch (provider) {
+    case LLMProvider.Gemini:
+      apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY || '';
+      break;
+    case LLMProvider.OpenAI:
+      apiKey = process.env.OPENAI_API_KEY || '';
+      break;
+    case LLMProvider.OpenRouter:
+      apiKey = process.env.OPENROUTER_API_KEY || '';
+      break;
+    case LLMProvider.Anthropic:
+      apiKey = process.env.ANTHROPIC_API_KEY || '';
+      break;
+  }
+
+  return {
+    apiKey,
+    modelId: modelName.trim() || getDefaultModel(),
+  };
+}
+
+// Export for use in Anthropic if needed later
+export { convertGoogleSchemaToJSONSchema };
+
