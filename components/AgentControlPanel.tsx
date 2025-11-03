@@ -1,0 +1,162 @@
+
+import React from 'react';
+import { Team, AgentRole, Language, LLMProvider } from '../types';
+import { SpinnerIcon, CogIcon } from './icons';
+
+interface AgentControlPanelProps {
+  teams: Team[];
+  roles: AgentRole[];
+  languages: Language[];
+  llmProviders: LLMProvider[];
+  modelName: string;
+  availableTools: string[];
+  customTools: string[];
+  selectedTeam: Team;
+  selectedRole: AgentRole;
+  selectedLanguage: Language;
+  selectedLLMProvider: LLMProvider;
+  selectedTools: string[];
+  onTeamChange: (team: Team) => void;
+  onRoleChange: (role: AgentRole) => void;
+  onLanguageChange: (language: Language) => void;
+  onLLMProviderChange: (provider: LLMProvider) => void;
+  onModelNameChange: (name: string) => void;
+  onToolsChange: (tool: string) => void;
+  onGenerate: () => void;
+  onManageTools: () => void;
+  isLoading: boolean;
+  isLoadingMessage: string;
+}
+
+const CustomSelect: React.FC<{ label: string; value: string; onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void; children: React.ReactNode }> = ({ label, value, onChange, children }) => (
+    <div className="flex-1 min-w-[150px]">
+        <label className="block text-sm font-medium text-[--color-accent-gold] mb-1">{label}</label>
+        <div className="relative">
+            <select
+                value={value}
+                onChange={onChange}
+                className="w-full bg-[--color-bg-dark-brown]/80 border border-[--color-bg-light-brown] text-[--color-text-light] rounded-md py-2 pl-3 pr-10 appearance-none focus:outline-none focus:ring-2 focus:ring-[--color-accent-gold]"
+            >
+                {children}
+            </select>
+            <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                <svg className="h-5 w-5 text-[--color-text-light]/70" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+            </span>
+        </div>
+    </div>
+);
+
+const AgentControlPanel: React.FC<AgentControlPanelProps> = ({
+  teams,
+  roles,
+  languages,
+  llmProviders,
+  modelName,
+  availableTools,
+  customTools,
+  selectedTeam,
+  selectedRole,
+  selectedLanguage,
+  selectedLLMProvider,
+  selectedTools,
+  onTeamChange,
+  onRoleChange,
+  onLanguageChange,
+  onLLMProviderChange,
+  onModelNameChange,
+  onToolsChange,
+  onGenerate,
+  onManageTools,
+  isLoading,
+  isLoadingMessage,
+}) => {
+  const allTools = [...new Set([...availableTools, ...customTools])];
+  
+  const getModelPlaceholder = () => {
+    switch (selectedLLMProvider) {
+      case LLMProvider.OpenAI:
+        return 'e.g., gpt-4o';
+      case LLMProvider.OpenRouter:
+        return 'e.g., mistralai/mixtral-8x7b-instruct';
+      case LLMProvider.Gemini:
+      default:
+        return 'e.g., gemini-2.5-pro';
+    }
+  };
+
+  return (
+    <div className="bg-[--color-bg-med-brown]/20 border border-[--color-bg-light-brown] rounded-lg p-4 md:p-6 shadow-lg backdrop-blur-md">
+      <h2 className="text-lg font-orbitron text-[--color-accent-red] mb-4 border-b border-[--color-accent-red]/30 pb-2">:: Mission Parameters ::</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+        <CustomSelect label="Select Team" value={selectedTeam} onChange={(e) => onTeamChange(e.target.value as Team)}>
+            {teams.map((team) => ( <option key={team} value={team}>{team} Team</option> )) }
+        </CustomSelect>
+        <CustomSelect label="Assign Role" value={selectedRole} onChange={(e) => onRoleChange(e.target.value as AgentRole)}>
+            {roles.map((role) => ( <option key={role} value={role}>{role}</option> )) }
+        </CustomSelect>
+        <CustomSelect label="Select Language" value={selectedLanguage} onChange={(e) => onLanguageChange(e.target.value as Language)}>
+            {languages.map((lang) => ( <option key={lang} value={lang}>{lang}</option> ))}
+        </CustomSelect>
+        <div className="lg:col-span-2 grid grid-cols-2 gap-4">
+            <CustomSelect label="LLM Provider" value={selectedLLMProvider} onChange={(e) => onLLMProviderChange(e.target.value as LLMProvider)}>
+                {llmProviders.map((provider) => ( <option key={provider} value={provider}>{provider}</option>))}
+            </CustomSelect>
+             <div className="flex-1 min-w-[150px]">
+                <label className="block text-sm font-medium text-[--color-accent-gold] mb-1">Custom Model Name</label>
+                <input
+                    type="text"
+                    value={modelName}
+                    onChange={(e) => onModelNameChange(e.target.value)}
+                    placeholder={getModelPlaceholder()}
+                    className="w-full bg-[--color-bg-dark-brown]/80 border border-[--color-bg-light-brown] text-[--color-text-light] rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-[--color-accent-gold]"
+                />
+            </div>
+        </div>
+      </div>
+
+      {(availableTools.length > 0 || customTools.length > 0) && (
+          <div className="mb-6">
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="block text-sm font-medium text-[--color-accent-gold]">:: Tool Selection ::</h3>
+                <button onClick={onManageTools} className="flex items-center text-xs text-[--color-text-med] hover:text-[--color-text-dark] transition-colors">
+                    <CogIcon className="h-4 w-4 mr-1" />
+                    Manage Custom Tools
+                </button>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2 bg-black/10 p-3 rounded-md border border-[--color-bg-light-brown]">
+                  {allTools.map(tool => (
+                      <label key={tool} className="flex items-center space-x-2 text-sm text-[--color-text-dark] cursor-pointer">
+                          <input
+                              type="checkbox"
+                              checked={selectedTools.includes(tool)}
+                              onChange={() => onToolsChange(tool)}
+                              className="w-4 h-4 text-[--color-accent-red] bg-gray-700 border-gray-500 rounded focus:ring-[--color-accent-red]/80 focus:ring-2"
+                          />
+                          <span>{tool}</span>
+                      </label>
+                  ))}
+              </div>
+          </div>
+      )}
+
+      <button
+        onClick={onGenerate}
+        disabled={isLoading}
+        className="w-full flex justify-center items-center bg-[--color-accent-red]/90 hover:bg-[--color-accent-red] disabled:bg-[--color-accent-red]/50 disabled:cursor-not-allowed text-white font-bold py-3 px-4 rounded-md transition-all duration-300 font-orbitron tracking-wider shadow-lg shadow-black/20"
+      >
+        {isLoading ? (
+          <>
+            <SpinnerIcon className="animate-spin h-5 w-5 mr-3" />
+            {isLoadingMessage || `FORGING ${selectedRole.toUpperCase()}...`}
+          </>
+        ) : (
+          'ENGAGE & FORGE MANIFEST'
+        )}
+      </button>
+    </div>
+  );
+};
+
+export default AgentControlPanel;
