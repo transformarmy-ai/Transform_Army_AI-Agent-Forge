@@ -133,7 +133,7 @@ The container includes the full multi-provider LLM system:
 - Anthropic Claude
 - OpenRouter
 
-Configure API keys in `.env` before building.
+Configure API keys in `.env` file (Docker Compose passes them as build arguments).
 
 ### ✅ Production Optimizations
 - **Gzip compression** for all text assets
@@ -154,8 +154,10 @@ Configure API keys in `.env` before building.
 
 ### Environment Variables
 
-**Build-time:** API keys are baked into the build during `docker-compose build`  
-**Runtime:** No environment variables needed at runtime for static serving
+**Build-time:** API keys are passed via Docker build arguments and baked into the static bundle during `docker-compose build`  
+**Runtime:** No environment variables needed at runtime (static files only)
+
+**Important:** The `.env` file is excluded from the Docker context but `docker-compose` automatically reads it and passes variables as build args.
 
 If you change `.env`:
 ```bash

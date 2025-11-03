@@ -5,11 +5,17 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      # Build arguments for API keys (from .env file)
+      args:
+        GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+        OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+        OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+        ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
     container_name: transform-army-ai-forge
     ports:
       - "88:80"  # Map host port 88 to container port 80
     environment:
-      # These are build-time only, actual runtime config should be in .env
+      # Runtime environment (not used by static build)
       - NODE_ENV=production
     restart: unless-stopped
     healthcheck:

@@ -2,6 +2,8 @@
 
 This project is containerized and ready to run with Docker. The container serves the built web application on port 88.
 
+**See also:** [DOCKER_SETUP_NOTES.md](./DOCKER_SETUP_NOTES.md) for technical details about environment variable handling.
+
 ---
 
 ## 🐳 Quick Start
@@ -76,7 +78,11 @@ The port mapping is `88:80` (host:container) as requested.
 
 ### Environment Variables
 
-The application uses environment variables for LLM API keys. To provide them:
+The application uses environment variables for LLM API keys. These are **build-time** variables that get baked into the static JavaScript bundle.
+
+**Important:** The `.env` file is **excluded** from the Docker build context for security, but `docker-compose` automatically reads variables from `.env` and passes them as build arguments.
+
+To configure API keys:
 
 1. Create a `.env` file in the project root
 2. Add your API keys:
@@ -89,14 +95,25 @@ OPENROUTER_API_KEY=your_openrouter_key_here
 ANTHROPIC_API_KEY=your_anthropic_key_here
 ```
 
-3. Rebuild if needed:
+3. Build with the environment variables:
 
 ```bash
-docker-compose down
-docker-compose up --build
+docker-compose build
+docker-compose up -d
 ```
 
-**Note:** Environment variables are baked into the build at build-time. After changing `.env`, you need to rebuild.
+**How it works:**
+- `docker-compose` reads `.env` from the project root
+- Variables are passed as Docker `ARG` values during build
+- Vite bundles them into the JavaScript at build-time
+- Final image contains only static files (no sensitive data in layers)
+
+**After changing `.env`:**
+```bash
+docker-compose down
+docker-compose build --no-cache
+docker-compose up -d
+```
 
 ---
 
