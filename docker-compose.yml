@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  agent-forge:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: transform-army-ai-forge
+    ports:
+      - "88:80"  # Map host port 88 to container port 80
+    environment:
+      # These are build-time only, actual runtime config should be in .env
+      - NODE_ENV=production
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      - "com.transformarmyai.service=agent-forge"
+      - "com.transformarmyai.description=Agent Forge Web UI"
+
