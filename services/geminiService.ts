@@ -2,6 +2,103 @@
 import { AgentProfile, Team, AgentRole, Language, LLMProvider, SystemTeamRole, CustomTool, AgentV1, LanguageV1, ExecutionV1, ModelV1, PromptsV1, ToolV1, MemoryV1, EnvV1, TestV1, AgentStatus } from '../types';
 import { createLLMProvider } from './llmService';
 
+// Robust JSON parser that handles control characters and malformed JSON
+function parseJSONSafely(jsonString: string): any {
+  try {
+    // First, try direct parsing
+    return JSON.parse(jsonString);
+  } catch (error) {
+    console.warn('⚠️ [JSON PARSE] Initial parse failed, attempting repair...');
+    
+    // Try to extract JSON from markdown code blocks more aggressively
+    let cleaned = jsonString.trim();
+    
+    // Remove markdown code blocks (various formats)
+    cleaned = cleaned.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '').trim();
+    
+    // Try to find JSON object boundaries
+    const firstBrace = cleaned.indexOf('{');
+    const lastBrace = cleaned.lastIndexOf('}');
+    
+    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+      cleaned = cleaned.substring(firstBrace, lastBrace + 1);
+    }
+    
+    // Try parsing again after cleaning
+    try {
+      return JSON.parse(cleaned);
+    } catch (secondError) {
+      console.error('⚠️ [JSON PARSE] Repair attempt failed, trying to fix control characters...');
+      
+      // Try to fix unescaped control characters in string values
+      // This is a heuristic approach - we'll try to find and escape control chars
+      try {
+        // Use a more aggressive approach: manually parse and fix control characters
+        let fixed = cleaned;
+        
+        // Process character by character to properly escape control characters in strings
+        let inString = false;
+        let escaped = false;
+        let result = '';
+        
+        for (let i = 0; i < fixed.length; i++) {
+          const char = fixed[i];
+          
+          if (escaped) {
+            result += char;
+            escaped = false;
+            continue;
+          }
+          
+          if (char === '\\') {
+            escaped = true;
+            result += char;
+            continue;
+          }
+          
+          if (char === '"') {
+            inString = !inString;
+            result += char;
+            continue;
+          }
+          
+          if (inString) {
+            // Inside a string, escape control characters
+            if (char === '\n') {
+              result += '\\n';
+            } else if (char === '\r') {
+              result += '\\r';
+            } else if (char === '\t') {
+              result += '\\t';
+            } else if (char === '\f') {
+              result += '\\f';
+            } else if (char === '\b') {
+              result += '\\b';
+            } else if (char.charCodeAt(0) < 32) {
+              // Any other control character
+              result += '\\u' + ('0000' + char.charCodeAt(0).toString(16)).slice(-4);
+            } else {
+              result += char;
+            }
+          } else {
+            result += char;
+          }
+        }
+        
+        return JSON.parse(result);
+      } catch (thirdError) {
+        console.error('❌ [JSON PARSE] All repair attempts failed');
+        console.error('  - Original error:', error instanceof Error ? error.message : String(error));
+        console.error('  - Second error:', secondError instanceof Error ? secondError.message : String(secondError));
+        console.error('  - Third error:', thirdError instanceof Error ? thirdError.message : String(thirdError));
+        console.error('  - Problematic JSON (first 500 chars):', cleaned.substring(0, 500));
+        console.error('  - Problematic JSON (last 500 chars):', cleaned.substring(Math.max(0, cleaned.length - 500)));
+        throw new Error(`Failed to parse JSON response from LLM. Error: ${error instanceof Error ? error.message : String(error)}. The response may contain invalid control characters or malformed JSON.`);
+      }
+    }
+  }
+}
+
 // JSON Schema definitions (converted from Google Type enum to standard JSON Schema)
 const toolParameterSchema = {
     type: "object",
@@ -191,7 +288,8 @@ export const generateAgent = async (
     console.log('  - First 200 chars:', jsonText.substring(0, 200));
     console.log('  - Last 200 chars:', jsonText.substring(Math.max(0, jsonText.length - 200)));
     
-    const agentManifest: AgentV1 = JSON.parse(jsonText);
+    // Use safe JSON parser that handles control characters
+    const agentManifest: AgentV1 = parseJSONSafely(jsonText);
 
     const avatarBase64 = await generateAvatar(team, role);
 
@@ -258,7 +356,8 @@ export const normalizeAgent = async (foreignManifestJson: string, llmProvider: L
         console.log('  - First 200 chars:', jsonText.substring(0, 200));
         console.log('  - Last 200 chars:', jsonText.substring(Math.max(0, jsonText.length - 200)));
         
-        const normalizedManifest: AgentV1 = JSON.parse(jsonText);
+        // Use safe JSON parser that handles control characters
+        const normalizedManifest: AgentV1 = parseJSONSafely(jsonText);
 
         // Determine Team/Role from manifest for UI purposes
         const name = normalizedManifest.name.toLowerCase();
