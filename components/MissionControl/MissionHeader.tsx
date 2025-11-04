@@ -60,6 +60,15 @@ const MissionHeader: React.FC = () => {
       {/* Top Row - Mission Name & Status */}
       <div className="px-6 py-4 flex items-center justify-between bg-gradient-to-r from-[--color-bg-secondary] to-[--color-bg-elevated]">
         <div className="flex items-center gap-4">
+          {/* Back to Forge Button */}
+          <button
+            onClick={() => (window as any).navigateToPage?.('forge')}
+            className="px-3 py-2 bg-[--color-accent-blue] hover:bg-blue-700 text-white rounded font-semibold transition-colors flex items-center gap-2"
+            title="Back to Agent Forge"
+          >
+            ← FORGE
+          </button>
+
           <div>
             <h1 className="text-3xl font-orbitron font-bold text-[--color-accent-red]" style={{ textShadow: '0 0 15px var(--color-glow-red)' }}>
               MISSION CONTROL
