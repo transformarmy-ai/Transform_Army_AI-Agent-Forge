@@ -185,6 +185,13 @@ export const generateAgent = async (
       { temperature: 0.7 }
     );
     
+    // DIAGNOSTIC LOG: Log the raw response before parsing
+    console.log('🔍 [DIAGNOSTIC] Raw LLM response:');
+    console.log('  - Response length:', jsonText.length);
+    console.log('  - Response type:', typeof jsonText);
+    console.log('  - First 200 chars:', jsonText.substring(0, 200));
+    console.log('  - Last 200 chars:', jsonText.substring(Math.max(0, jsonText.length - 200)));
+    
     const agentManifest: AgentV1 = JSON.parse(jsonText);
 
     const avatarBase64 = await generateAvatar(team, role);
@@ -243,6 +250,13 @@ export const normalizeAgent = async (foreignManifestJson: string): Promise<Agent
           agentV1Schema,
           { temperature: 0.5 }
         );
+        
+        // DIAGNOSTIC LOG: Log the raw response before parsing
+        console.log('🔍 [DIAGNOSTIC] Raw LLM response for normalization:');
+        console.log('  - Response length:', jsonText.length);
+        console.log('  - Response type:', typeof jsonText);
+        console.log('  - First 200 chars:', jsonText.substring(0, 200));
+        console.log('  - Last 200 chars:', jsonText.substring(Math.max(0, jsonText.length - 200)));
         
         const normalizedManifest: AgentV1 = JSON.parse(jsonText);
 

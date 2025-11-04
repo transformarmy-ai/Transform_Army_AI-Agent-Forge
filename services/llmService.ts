@@ -99,11 +99,19 @@ export class OpenAIProvider implements LLMProviderInterface {
 
       if (!response.ok) {
         const error = await response.text();
+        console.log('🔍 [DIAGNOSTIC] OpenAI API Error Response:');
+        console.log('  - Status:', response.status);
+        console.log('  - Status Text:', response.statusText);
+        console.log('  - Error body:', error);
         throw new Error(`OpenAI API error: ${response.status} - ${error}`);
       }
 
       const data = await response.json();
-      return data.choices[0].message.content.trim();
+      const content = data.choices[0].message.content.trim();
+      console.log('🔍 [DIAGNOSTIC] OpenAI API Success Response:');
+      console.log('  - Content length:', content.length);
+      console.log('  - First 100 chars:', content.substring(0, 100));
+      return content;
     } catch (error) {
       console.error('OpenAI provider error:', error);
       throw new Error(`Failed to generate content with OpenAI: ${error instanceof Error ? error.message : String(error)}`);
@@ -152,14 +160,27 @@ export class AnthropicProvider implements LLMProviderInterface {
 
       if (!response.ok) {
         const error = await response.text();
+        console.log('🔍 [DIAGNOSTIC] Anthropic API Error Response:');
+        console.log('  - Status:', response.status);
+        console.log('  - Status Text:', response.statusText);
+        console.log('  - Error body:', error);
         throw new Error(`Anthropic API error: ${response.status} - ${error}`);
       }
 
       const data = await response.json();
       const text = data.content[0].text.trim();
       
+      console.log('🔍 [DIAGNOSTIC] Anthropic API Success Response:');
+      console.log('  - Raw text length:', text.length);
+      console.log('  - First 100 chars:', text.substring(0, 100));
+      
       // Remove markdown code blocks if present
-      return text.replace(/^```json\n/, '').replace(/```$/, '').trim();
+      const cleanedText = text.replace(/^```json\n/, '').replace(/```$/, '').trim();
+      console.log('🔍 [DIAGNOSTIC] Anthropic API Cleaned Response:');
+      console.log('  - Cleaned text length:', cleanedText.length);
+      console.log('  - First 100 chars:', cleanedText.substring(0, 100));
+      
+      return cleanedText;
     } catch (error) {
       console.error('Anthropic provider error:', error);
       throw new Error(`Failed to generate content with Anthropic: ${error instanceof Error ? error.message : String(error)}`);
@@ -204,11 +225,19 @@ export class OpenRouterProvider implements LLMProviderInterface {
 
       if (!response.ok) {
         const error = await response.text();
+        console.log('🔍 [DIAGNOSTIC] OpenRouter API Error Response:');
+        console.log('  - Status:', response.status);
+        console.log('  - Status Text:', response.statusText);
+        console.log('  - Error body:', error);
         throw new Error(`OpenRouter API error: ${response.status} - ${error}`);
       }
 
       const data = await response.json();
-      return data.choices[0].message.content.trim();
+      const content = data.choices[0].message.content.trim();
+      console.log('🔍 [DIAGNOSTIC] OpenRouter API Success Response:');
+      console.log('  - Content length:', content.length);
+      console.log('  - First 100 chars:', content.substring(0, 100));
+      return content;
     } catch (error) {
       console.error('OpenRouter provider error:', error);
       throw new Error(`Failed to generate content with OpenRouter: ${error instanceof Error ? error.message : String(error)}`);
@@ -257,11 +286,19 @@ export class GeminiProvider implements LLMProviderInterface {
 
       if (!response.ok) {
         const error = await response.text();
+        console.log('🔍 [DIAGNOSTIC] Gemini API Error Response:');
+        console.log('  - Status:', response.status);
+        console.log('  - Status Text:', response.statusText);
+        console.log('  - Error body:', error);
         throw new Error(`Gemini API error: ${response.status} - ${error}`);
       }
 
       const data = await response.json();
-      return data.candidates[0].content.parts[0].text.trim();
+      const content = data.candidates[0].content.parts[0].text.trim();
+      console.log('🔍 [DIAGNOSTIC] Gemini API Success Response:');
+      console.log('  - Content length:', content.length);
+      console.log('  - First 100 chars:', content.substring(0, 100));
+      return content;
     } catch (error) {
       console.error('Gemini provider error:', error);
       throw new Error(`Failed to generate content with Gemini: ${error instanceof Error ? error.message : String(error)}`);
