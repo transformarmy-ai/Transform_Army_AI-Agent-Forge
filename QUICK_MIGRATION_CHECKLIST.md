@@ -70,7 +70,6 @@ grep -r "generateContent" . --include="*.ts" --include="*.tsx"
 - [ ] Update any hardcoded provider references
 
 ### 7. Testing
-- [ ] Test Gemini: simple text + structured output
 - [ ] Test OpenAI: simple text + structured output
 - [ ] Test Anthropic: simple text + structured output
 - [ ] Test OpenRouter: simple text + structured output
@@ -122,7 +121,7 @@ const ai = new GoogleGenAI({ apiKey: API_KEY! });
 **Before:**
 ```typescript
 const response = await ai.models.generateContent({
-    model: 'gemini-2.5-pro',
+    model: 'gpt-4o',
     contents: { parts: [{ text: prompt }] },
     config: { temperature: 0.7 }
 });
@@ -131,7 +130,7 @@ const text = response.text.trim();
 
 **After:**
 ```typescript
-const llm = createLLMProvider(LLMProvider.Gemini, 'gemini-2.5-pro');
+const llm = createLLMProvider(LLMProvider.OpenAI, 'gpt-4o');
 if (!llm) throw new Error('API key not configured');
 
 const text = await llm.generateContent(prompt, { temperature: 0.7 });
@@ -144,7 +143,7 @@ const text = await llm.generateContent(prompt, { temperature: 0.7 });
 **Before:**
 ```typescript
 const response = await ai.models.generateContent({
-    model: 'gemini-2.5-pro',
+    model: 'gpt-4o',
     contents: { parts: [{ text: prompt }] },
     config: {
         responseMimeType: "application/json",
@@ -158,7 +157,7 @@ const result = JSON.parse(jsonText);
 
 **After:**
 ```typescript
-const llm = createLLMProvider(LLMProvider.Gemini, 'gemini-2.5-pro');
+const llm = createLLMProvider(LLMProvider.OpenAI, 'gpt-4o');
 if (!llm) throw new Error('API key not configured');
 
 const jsonText = await llm.generateStructuredOutput(

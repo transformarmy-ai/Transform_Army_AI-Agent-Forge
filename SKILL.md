@@ -38,8 +38,8 @@ Google AI Studio projects using `@google/genai` face several limitations:
 │  ┌────────┴─────────┬────────────────┐  │
 │  │                  │                │  │
 │  ▼                  ▼                ▼  │
-│  GeminiProvider    OpenAIProvider  ...  │
-│  (REST)            (REST)               │
+│  [REMOVED]         OpenAIProvider  ...  │
+│  (deprecated)      (REST)               │
 └─────────────────────────────────────────┘
 ```
 
@@ -154,77 +154,10 @@ function convertGoogleSchemaToJSONSchema(schema: any): any {
 }
 ```
 
-#### 2.3 Implement Gemini Provider (REST API)
+#### 2.3 (Removed) Provider Example
 
 ```typescript
-export class GeminiProvider implements LLMProviderInterface {
-  private apiKey: string;
-  private modelId: string;
-
-  constructor(apiKey: string, modelId: string = 'gemini-2.5-pro') {
-    this.apiKey = apiKey;
-    this.modelId = modelId;
-  }
-
-  getName(): string { return 'Google Gemini'; }
-  supportsStructuredOutputs(): boolean { return true; }
-
-  async generateContent(prompt: string, config?: LLMConfig): Promise<string> {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${this.modelId}:generateContent?key=${this.apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: config?.temperature ?? 0.7,
-            maxOutputTokens: config?.maxTokens ?? 4096,
-          },
-        }),
-      }
-    );
-
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`Gemini API error: ${response.status} - ${error}`);
-    }
-
-    const data = await response.json();
-    return data.candidates[0].content.parts[0].text.trim();
-  }
-
-  async generateStructuredOutput(
-    prompt: string,
-    schema: any,
-    config?: LLMConfig
-  ): Promise<string> {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${this.modelId}:generateContent?key=${this.apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            responseMimeType: 'application/json',
-            responseSchema: schema, // Already in correct format
-            temperature: config?.temperature ?? 0.7,
-            maxOutputTokens: config?.maxTokens ?? 4096,
-          },
-        }),
-      }
-    );
-
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`Gemini API error: ${response.status} - ${error}`);
-    }
-
-    const data = await response.json();
-    return data.candidates[0].content.parts[0].text.trim();
-  }
-}
+// This section has been removed. Refer to OpenAI, Anthropic, OpenRouter, or Local (Ollama/LM Studio) providers.
 ```
 
 #### 2.4 Implement Other Providers

@@ -28,7 +28,7 @@ Your Agent Forge application now supports **3 LLM providers**: OpenAI, Anthropic
                │
                ▼
 ┌─────────────────────────────────────┐
-│   geminiService.ts (no change!)     │
+│   geminiService.ts (service layer)  │
 │   - generateAgent()                 │
 │   - normalizeAgent()                │
 │   - generateAvatar()                │
@@ -42,8 +42,8 @@ Your Agent Forge application now supports **3 LLM providers**: OpenAI, Anthropic
 │   └────────────┬─────────────────┘  │
 │                ▼                     │
 │   ┌──────────────────────────────┐  │
-│   │  GeminiProvider              │  │
-│   │  (REST API)                  │  │
+│   │  Local/Other Providers       │  │
+│   │  (as needed)                 │  │
 │   └──────────────────────────────┘  │
 │   ┌──────────────────────────────┐  │
 │   │  OpenAIProvider              │  │
@@ -70,7 +70,6 @@ Create a `.env` file in your project root:
 
 ```bash
 # Add at least ONE of these:
-GEMINI_API_KEY=your_key_here
 OPENAI_API_KEY=your_key_here
 ANTHROPIC_API_KEY=your_key_here
 OPENROUTER_API_KEY=your_key_here
@@ -79,7 +78,6 @@ OPENROUTER_API_KEY=your_key_here
 ### 2. Choose Your Provider in the UI
 
 When forging an agent, you can now select from:
-- **Google Gemini** (default)
 - **OpenAI** 
 - **OpenRouter**
 - **Anthropic**
@@ -107,11 +105,11 @@ const profile = await generateAgent(
 
 ## Provider Details
 
-### Google Gemini
-- **Models**: gemini-2.5-pro, gemini-1.5-pro, gemini-1.5-flash
-- **Best For**: Fast responses, JSON mode
-- **Free Tier**: Yes
-- **API**: REST (Generative AI API)
+### Local Providers (Optional)
+- **Examples**: Ollama (llama3.1, mistral), LM Studio (GGUF models)
+- **Best For**: Privacy, offline use, experimentation
+- **Free Tier**: Yes (runs locally)
+- **API**: Ollama REST; LM Studio OpenAI-compatible
 
 ### OpenAI
 - **Models**: gpt-4o, gpt-4-turbo, gpt-4, gpt-3.5-turbo
@@ -214,9 +212,9 @@ Easy to add new providers (e.g., Cohere, Hugging Face, etc.)
 
 ## Testing Your Migration
 
-1. **Start with Gemini** (if you have a key)
-   - Should work exactly as before
-   - No breaking changes expected
+1. **Start with OpenAI** (if you have a key)
+   - Deterministic structured outputs
+   - Clear error messages
 
 2. **Try OpenAI** (if you have access)
    - Install dependencies: `npm install`

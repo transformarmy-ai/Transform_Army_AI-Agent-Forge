@@ -100,7 +100,7 @@ This is the core "intelligent" feature of the new architecture.
 
 ```
 +----------------+  1. Upload  +---------------------+  2. Send to AI w/ Rules   +-------------------+
-| Foreign JSON   |----------->| React App           |------------------------->|   Gemini API      |
+| Foreign JSON   |----------->| React App           |------------------------->| Multi-Provider AI |
 | (non-compliant)|            | (handleImportManifest)|                         | (normalizeAgent)  |
 +----------------+            +----------+----------+                         +---------+---------+
                                         ^                                               | 3. AI applies ACoC
@@ -122,10 +122,10 @@ This is the core "intelligent" feature of the new architecture.
 
 2.  **`geminiService.ts` (`normalizeAgent`)**:
     -   This is the core of the AI logic. It does **not** attempt to parse or manipulate the JSON itself.
-    -   It constructs a new, specific prompt for the Gemini API.
+    -   It constructs a strict prompt for the selected provider with JSON rules.
     -   This prompt contains the **ACoC/C-CoC rules** from the design document, instructing the AI on *how* to perform the normalization.
     -   It embeds the user's uploaded `foreignManifestJson` string directly into this prompt.
-    -   It makes a `generateContent` call, but this time, the `responseSchema` is the full `agentV1Schema`.
+    -   It makes a structured-output call with the full `agentV1Schema` and low temperature.
     -   The AI reads the rules and the foreign manifest, performs the normalization in its own context, and generates a new, compliant `agent.v1` manifest as a structured JSON object.
     -   The service then wraps this manifest in a UI-friendly `AgentProfile` and returns it.
 

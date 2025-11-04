@@ -315,7 +315,7 @@ const agentV1Schema = {
         importMeta: {
             type: "object",
             properties: {
-                normalizedBy: { type: "string" },
+                source: { type: "string" },
                 changes: { type: "array", items: { type: "string" } },
                 timestamp: { type: "string" }
             }

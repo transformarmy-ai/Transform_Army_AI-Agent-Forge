@@ -144,7 +144,7 @@ export function enforceACoCRules(manifest: any): { manifest: AgentV1; changes: s
   const nonEmptyChanges = changes.filter(Boolean);
   if (nonEmptyChanges.length > 0) {
     (m as any).importMeta = {
-      normalizedBy: 'ACoC',
+      source: 'ACoC',
       changes: nonEmptyChanges,
       timestamp: new Date().toISOString(),
     };

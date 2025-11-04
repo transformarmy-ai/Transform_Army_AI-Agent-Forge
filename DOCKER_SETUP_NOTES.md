@@ -84,8 +84,12 @@ COPY .env .
 ### ✅ Do this instead:
 ```bash
 # Use build arguments
-ARG GEMINI_API_KEY
-RUN echo "GEMINI_API_KEY=${GEMINI_API_KEY}" > .env
+ARG OPENAI_API_KEY
+ARG OPENROUTER_API_KEY
+ARG ANTHROPIC_API_KEY
+RUN echo "OPENAI_API_KEY=${OPENAI_API_KEY}" > .env \
+ && echo "OPENROUTER_API_KEY=${OPENROUTER_API_KEY}" >> .env \
+ && echo "ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}" >> .env
 ```
 
 ## 🧪 Testing Your Setup
@@ -95,8 +99,7 @@ RUN echo "GEMINI_API_KEY=${GEMINI_API_KEY}" > .env
 # Check docker-compose reads it
 docker-compose config
 
-# Should show:
-# GEMINI_API_KEY: sk-your-key-here
+# Should show your configured keys
 ```
 
 ### Verify keys get baked in:
@@ -109,8 +112,8 @@ docker create --name temp agent-forge:latest
 docker cp temp:/usr/share/nginx/html /tmp/extracted
 docker rm temp
 
-# Search for your API key (should be visible)
-grep -r "GEMINI_API_KEY" /tmp/extracted
+# Search for your API keys (should be present)
+grep -r "OPENAI_API_KEY\|OPENROUTER_API_KEY\|ANTHROPIC_API_KEY" /tmp/extracted
 ```
 
 ## 🔍 Debugging
@@ -128,9 +131,9 @@ grep -r "GEMINI_API_KEY" /tmp/extracted
    ```
 
 3. **Check build args passed:**
-   ```bash
-   docker-compose build --progress=plain 2>&1 | grep -A 5 "ARG GEMINI_API_KEY"
-   ```
+```bash
+docker-compose build --progress=plain 2>&1 | grep -A 5 "ARG OPENAI_API_KEY"
+```
 
 4. **Check Vite receives them:**
    Build will fail if keys are missing at build-time
@@ -139,7 +142,7 @@ grep -r "GEMINI_API_KEY" /tmp/extracted
 
 If you see:
 ```javascript
-process.env.GEMINI_API_KEY = ""
+process.env.OPENAI_API_KEY = ""
 ```
 
 It means:
@@ -154,8 +157,9 @@ If you don't want to use `.env`:
 
 ```bash
 docker build \
-  --build-arg GEMINI_API_KEY="sk-..." \
   --build-arg OPENAI_API_KEY="sk-..." \
+  --build-arg OPENROUTER_API_KEY="sk-..." \
+  --build-arg ANTHROPIC_API_KEY="sk-..." \
   -t agent-forge .
 ```
 
@@ -166,8 +170,9 @@ For CI/CD:
 ```bash
 # Use secrets management
 docker build \
-  --build-arg GEMINI_API_KEY="$GEMINI_API_KEY_SECRET" \
   --build-arg OPENAI_API_KEY="$OPENAI_API_KEY_SECRET" \
+  --build-arg OPENROUTER_API_KEY="$OPENROUTER_API_KEY_SECRET" \
+  --build-arg ANTHROPIC_API_KEY="$ANTHROPIC_API_KEY_SECRET" \
   -t agent-forge:prod .
 ```
 
