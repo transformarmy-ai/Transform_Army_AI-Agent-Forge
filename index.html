@@ -194,20 +194,9 @@
       const canvas = document.getElementById('matrix-rain');
       const ctx = canvas.getContext('2d');
       
-      // Set canvas size
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      
       // Binary characters (0s and 1s)
       const binary = '01';
       const fontSize = 14;
-      const columns = canvas.width / fontSize;
-      
-      // Array to track drop position for each column
-      const drops = [];
-      for (let i = 0; i < columns; i++) {
-        drops[i] = Math.random() * -100; // Start at random positions
-      }
       
       // Color scheme for the rain (red, white, blue accents)
       const colors = [
@@ -217,6 +206,28 @@
         'rgba(220, 20, 60, 0.6)',    // Red dimmer
         'rgba(255, 255, 255, 0.6)',  // White dimmer
       ];
+      
+      // Variables that need to be recalculated on resize
+      let columns;
+      let drops = [];
+      
+      // Initialize or reinitialize the matrix rain
+      function initMatrixRain() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        // Recalculate columns based on new canvas width
+        columns = Math.floor(canvas.width / fontSize);
+        
+        // Reinitialize drops array for new column count
+        drops = [];
+        for (let i = 0; i < columns; i++) {
+          drops[i] = Math.random() * -100; // Start at random positions
+        }
+      }
+      
+      // Initialize on page load
+      initMatrixRain();
       
       function draw() {
         // Create fade effect with semi-transparent black
@@ -249,10 +260,9 @@
       // Animation loop
       setInterval(draw, 50);
       
-      // Resize canvas on window resize
+      // Resize canvas on window resize and reinitialize
       window.addEventListener('resize', () => {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        initMatrixRain();
       });
       
       // Polyfill for crypto.randomUUID() for browsers that don't support it
