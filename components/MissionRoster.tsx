@@ -33,8 +33,8 @@ const MissionRoster: React.FC<MissionRosterProps> = ({
     switch (team) {
       case 'Red': return 'border-[--color-accent-red]';
       case 'Blue': return 'border-[--color-accent-blue]';
-      case 'System': return 'border-[--color-accent-gold]';
-      default: return 'border-[--color-text-med]';
+      case 'System': return 'border-[--color-accent-cyan]';
+      default: return 'border-[--color-text-muted]';
     }
   };
 
@@ -51,13 +51,14 @@ const MissionRoster: React.FC<MissionRosterProps> = ({
       onLoadTemplate(template);
   }
 
-  const IconButton: React.FC<{onClick: () => void, disabled: boolean, title: string, children: React.ReactNode }> = 
+  const IconButton: React.FC<{onClick: () => void, disabled: boolean, title: string, children: React.ReactNode }> =
     ({onClick, disabled, title, children}) => (
-        <button 
-            onClick={onClick} 
-            disabled={disabled} 
-            title={title} 
-            className="text-[--color-text-med] hover:text-[--color-text-dark] transition-colors disabled:text-[--color-bg-light-brown] disabled:cursor-not-allowed"
+        <button
+            onClick={onClick}
+            disabled={disabled}
+            title={title}
+            className="text-[--color-text-secondary] hover:text-[--color-accent-cyan] transition-all duration-200 disabled:text-[--color-text-muted] disabled:cursor-not-allowed hover:scale-110"
+            style={{ textShadow: disabled ? 'none' : '0 0 5px var(--color-glow-cyan)' }}
         >
             {children}
         </button>

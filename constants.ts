@@ -5,37 +5,50 @@ export const TEAMS = [Team.System, Team.Red, Team.Blue];
 export const LANGUAGES = [Language.Python, Language.JavaScript, Language.Go, Language.Rust];
 export const LLM_PROVIDERS = [LLMProvider.Gemini, LLMProvider.OpenAI, LLMProvider.OpenRouter, LLMProvider.Anthropic];
 
-// A programmatically generated SVG gear logo, themed to match the app.
+// A programmatically generated SVG gear logo, themed to match the cyber-military app.
 // This is a self-contained data URL, making the app portable.
 const gearSvg = `
 <svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <filter id="dropshadow" height="130%">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/> 
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
       <feOffset dx="2" dy="2" result="offsetblur"/>
       <feMerge>
         <feMergeNode/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
+    <filter id="cyberGlow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <linearGradient id="cyanGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00FFFF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00BFFF;stop-opacity:1" />
+    </linearGradient>
   </defs>
   <g transform="rotate(15 50 50)" style="filter:url(#dropshadow)">
-    <path 
+    <path
       d="M 50,12 A 38,38 0 0,1 50,88 A 38,38 0 0,1 50,12 M 50,22 A 28,28 0 0,0 50,78 A 28,28 0 0,0 50,22 Z"
-      fill="var(--color-bg-med-brown)"
+      fill="#1A1A1A"
     />
-    <path 
+    <path
       d="M 45,2 55,2 58,10 65,12 70,18 75,25 78,32 80,40 78,48 75,55 70,62 65,68 58,70 55,78 45,78 42,70 35,68 30,62 25,55 22,48 20,40 22,32 25,25 30,18 35,12 42,10 Z"
-      fill="var(--color-accent-gold)" 
-      stroke="var(--color-bg-dark-brown)"
+      fill="url(#cyanGradient)"
+      stroke="#0A0A0A"
       stroke-width="1.5"
+      style="filter:url(#cyberGlow)"
     />
-    <circle cx="50" cy="50" r="18" fill="var(--color-bg-dark-brown)" />
-    <circle cx="50" cy="50" r="10" fill="var(--color-accent-gold)" />
+    <circle cx="50" cy="50" r="18" fill="#0A0A0A" />
+    <circle cx="50" cy="50" r="10" fill="url(#cyanGradient)" style="filter:url(#cyberGlow)" />
+    <circle cx="50" cy="50" r="6" fill="#00FFFF" opacity="0.8" />
   </g>
 </svg>
 `;
-export const APP_LOGO_BASE64 = `data:image/svg+xml;base64,${btoa(gearSvg.replace(/var\(--color-accent-gold\)/g, '#D4AF37').replace(/var\(--color-bg-dark-brown\)/g, '#2E1F16').replace(/var\(--color-bg-med-brown\)/g, '#4A352F'))}`;
+export const APP_LOGO_BASE64 = `data:image/svg+xml;base64,${btoa(gearSvg)}`;
 
 
 export const ROLES_BY_TEAM: { [key in Team]: (RedTeamRole | BlueTeamRole | SystemTeamRole)[] } = {

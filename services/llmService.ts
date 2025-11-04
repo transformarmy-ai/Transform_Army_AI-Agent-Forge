@@ -108,10 +108,18 @@ export class OpenAIProvider implements LLMProviderInterface {
 
       const data = await response.json();
       const content = data.choices[0].message.content.trim();
+      
       console.log('🔍 [DIAGNOSTIC] OpenAI API Success Response:');
-      console.log('  - Content length:', content.length);
+      console.log('  - Raw content length:', content.length);
       console.log('  - First 100 chars:', content.substring(0, 100));
-      return content;
+      
+      // Remove markdown code blocks if present
+      const cleanedContent = content.replace(/^```json\n/, '').replace(/```$/, '').trim();
+      console.log('🔍 [DIAGNOSTIC] OpenAI API Cleaned Response:');
+      console.log('  - Cleaned content length:', cleanedContent.length);
+      console.log('  - First 100 chars:', cleanedContent.substring(0, 100));
+      
+      return cleanedContent;
     } catch (error) {
       console.error('OpenAI provider error:', error);
       throw new Error(`Failed to generate content with OpenAI: ${error instanceof Error ? error.message : String(error)}`);
@@ -234,10 +242,18 @@ export class OpenRouterProvider implements LLMProviderInterface {
 
       const data = await response.json();
       const content = data.choices[0].message.content.trim();
+      
       console.log('🔍 [DIAGNOSTIC] OpenRouter API Success Response:');
-      console.log('  - Content length:', content.length);
+      console.log('  - Raw content length:', content.length);
       console.log('  - First 100 chars:', content.substring(0, 100));
-      return content;
+      
+      // Remove markdown code blocks if present
+      const cleanedContent = content.replace(/^```json\n/, '').replace(/```$/, '').trim();
+      console.log('🔍 [DIAGNOSTIC] OpenRouter API Cleaned Response:');
+      console.log('  - Cleaned content length:', cleanedContent.length);
+      console.log('  - First 100 chars:', cleanedContent.substring(0, 100));
+      
+      return cleanedContent;
     } catch (error) {
       console.error('OpenRouter provider error:', error);
       throw new Error(`Failed to generate content with OpenRouter: ${error instanceof Error ? error.message : String(error)}`);
@@ -295,10 +311,18 @@ export class GeminiProvider implements LLMProviderInterface {
 
       const data = await response.json();
       const content = data.candidates[0].content.parts[0].text.trim();
+      
       console.log('🔍 [DIAGNOSTIC] Gemini API Success Response:');
-      console.log('  - Content length:', content.length);
+      console.log('  - Raw content length:', content.length);
       console.log('  - First 100 chars:', content.substring(0, 100));
-      return content;
+      
+      // Remove markdown code blocks if present
+      const cleanedContent = content.replace(/^```json\n/, '').replace(/```$/, '').trim();
+      console.log('🔍 [DIAGNOSTIC] Gemini API Cleaned Response:');
+      console.log('  - Cleaned content length:', cleanedContent.length);
+      console.log('  - First 100 chars:', cleanedContent.substring(0, 100));
+      
+      return cleanedContent;
     } catch (error) {
       console.error('Gemini provider error:', error);
       throw new Error(`Failed to generate content with Gemini: ${error instanceof Error ? error.message : String(error)}`);

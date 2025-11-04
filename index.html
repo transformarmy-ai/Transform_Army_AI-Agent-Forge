@@ -7,30 +7,134 @@
     <title>Transform Army AI: Agent Forge</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&family=Inter:wght@300..700&display=swap');
       :root {
+        /* === Typography === */
         --font-primary: 'Orbitron', sans-serif;
         --font-mono: 'Roboto Mono', monospace;
-        
-        /* Steampunk Theme */
-        --color-bg-parchment: #F5EADD;
-        --color-bg-dark-brown: #2E1F16;
-        --color-bg-med-brown: #4A352F;
-        --color-bg-light-brown: #A08C83;
+        --font-secondary: 'Inter', sans-serif;
 
-        --color-text-dark: #2E1F16;
-        --color-text-light: #F5EADD;
-        --color-text-med: #A08C83;
-        
-        --color-accent-red: #C0392B; /* From bow tie */
-        --color-accent-gold: #D4AF37; /* From gears */
-        --color-accent-blue: #3498DB; /* Goggle Lens Blue */
+        /* === Core Color Palette === */
+        /* Primary Backgrounds */
+        --color-bg-primary: #0A0A0A;
+        --color-bg-secondary: #1A1A1A;
+        --color-bg-tertiary: #2D2D2D;
+        --color-bg-elevated: #252525;
+        --color-bg-overlay: rgba(0, 0, 0, 0.8);
+
+        /* Accent Colors */
+        --color-accent-cyan: #00FFFF;
+        --color-accent-blue: #00BFFF;
+        --color-accent-green: #00FF41;
+        --color-accent-orange: #FF6B35;
+        --color-accent-red: #FF3366;
+
+        /* Text Colors */
+        --color-text-primary: #E0E0E0;
+        --color-text-secondary: #A0A0A0;
+        --color-text-muted: #606060;
+        --color-text-inverse: #0A0A0A;
+
+        /* Border & UI Elements */
+        --color-border-primary: #333333;
+        --color-border-secondary: #404040;
+        --color-border-accent: var(--color-accent-cyan);
+        --color-divider: #2A2A2A;
+
+        /* === State Colors === */
+        --color-success: var(--color-accent-green);
+        --color-warning: var(--color-accent-orange);
+        --color-error: var(--color-accent-red);
+        --color-info: var(--color-accent-blue);
+
+        /* === Interactive States === */
+        --color-hover-bg: rgba(0, 255, 255, 0.1);
+        --color-active-bg: rgba(0, 255, 255, 0.2);
+        --color-focus-ring: rgba(0, 255, 255, 0.5);
+        --color-disabled: rgba(160, 160, 160, 0.3);
+
+        /* === Effects & Gradients === */
+        --color-glow-cyan: rgba(0, 255, 255, 0.3);
+        --color-glow-blue: rgba(0, 191, 255, 0.3);
+        --gradient-primary: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%);
+        --gradient-accent: linear-gradient(135deg, var(--color-accent-cyan) 0%, var(--color-accent-blue) 100%);
+        --gradient-overlay: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.9) 100%);
+
+        /* === Shadows === */
+        --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+        --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4);
+        --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.5);
+        --shadow-glow: 0 0 20px var(--color-glow-cyan);
+        --shadow-inset: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+
+        /* === Spacing === */
+        --space-xs: 0.25rem;
+        --space-sm: 0.5rem;
+        --space-md: 1rem;
+        --space-lg: 1.5rem;
+        --space-xl: 2rem;
+        --space-2xl: 3rem;
+
+        /* === Border Radius === */
+        --radius-sm: 4px;
+        --radius-md: 8px;
+        --radius-lg: 12px;
+        --radius-xl: 16px;
+
+        /* === Transitions === */
+        --transition-fast: 150ms ease;
+        --transition-normal: 250ms ease;
+        --transition-slow: 350ms ease;
+
+        /* === Typography Scale === */
+        --text-xs: 0.75rem;
+        --text-sm: 0.875rem;
+        --text-base: 1rem;
+        --text-lg: 1.125rem;
+        --text-xl: 1.25rem;
+        --text-2xl: 1.5rem;
+        --text-3xl: 1.875rem;
+        --text-4xl: 2.25rem;
+
+        /* === Line Heights === */
+        --leading-tight: 1.25;
+        --leading-normal: 1.5;
+        --leading-relaxed: 1.75;
+
+        /* === Letter Spacing === */
+        --tracking-tight: -0.025em;
+        --tracking-normal: 0;
+        --tracking-wide: 0.025em;
+        --tracking-wider: 0.05em;
+        --tracking-widest: 0.1em;
+
+        /* === Component Specific === */
+        --header-height: 80px;
+        --sidebar-width: 280px;
+        --container-max-width: 1400px;
+        --card-padding: var(--space-lg);
+        --button-height: 48px;
+
+        /* Legacy Variables for Compatibility */
+        --color-bg-parchment: var(--color-bg-primary);
+        --color-bg-dark-brown: var(--color-bg-secondary);
+        --color-bg-med-brown: var(--color-bg-tertiary);
+        --color-bg-light-brown: var(--color-border-primary);
+        --color-text-dark: var(--color-text-primary);
+        --color-text-light: var(--color-text-primary);
+        --color-text-med: var(--color-text-secondary);
+        --color-accent-red: var(--color-accent-red);
+        --color-accent-gold: var(--color-accent-cyan);
+        --color-accent-blue: var(--color-accent-blue);
       }
       body {
         font-family: var(--font-mono);
-        background-color: var(--color-bg-parchment);
-        color: var(--color-text-dark);
-        background-image: url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%234A352F" fill-opacity="0.1"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');
+        background-color: var(--color-bg-primary);
+        color: var(--color-text-primary);
+        background-image:
+          radial-gradient(circle at 20% 50%, rgba(0, 255, 255, 0.05) 0%, transparent 50%),
+          radial-gradient(circle at 80% 80%, rgba(0, 191, 255, 0.05) 0%, transparent 50%),
+          radial-gradient(circle at 40% 20%, rgba(0, 255, 65, 0.03) 0%, transparent 50%);
       }
       .font-orbitron {
         font-family: var(--font-primary);

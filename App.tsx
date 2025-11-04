@@ -320,16 +320,19 @@ const App: React.FC = () => {
   };
 
   const WelcomeMessage: React.FC = () => (
-    <div className="text-center p-8 border-2 border-dashed border-[--color-bg-light-brown] rounded-lg h-full flex flex-col justify-center items-center col-span-1 lg:col-span-8">
-      <h2 className="text-2xl font-orbitron text-[--color-accent-red]">Welcome to the Manifest Forge</h2>
-      <p className="mt-2 text-[--color-bg-med-brown] max-w-lg">
+    <div className="text-center p-8 border-2 border-dashed border-[--color-border-accent]/50 rounded-lg h-full flex flex-col justify-center items-center col-span-1 lg:col-span-8 bg-[--color-bg-secondary]/50 backdrop-blur-sm">
+      <h2 className="text-2xl font-orbitron text-[--color-accent-cyan] uppercase tracking-wider mb-4"
+          style={{ textShadow: '0 0 15px var(--color-glow-cyan)' }}>
+        Welcome to the Manifest Forge
+      </h2>
+      <p className="mt-2 text-[--color-text-secondary] max-w-lg font-[--font-secondary] leading-relaxed">
         Use the **Mission Parameters** panel to forge compliant `agent.v1` manifests, or load a pre-configured team from the **Templates** menu in the Mission Roster.
       </p>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-[--color-bg-parchment]">
+    <div className="min-h-screen bg-[--color-bg-primary]" style={{ backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(0, 255, 255, 0.02) 0%, transparent 70%)' }}>
       <Header />
       <main className="p-4 md:p-8 max-w-[95rem] mx-auto">
         <div className="mb-8">
@@ -360,9 +363,10 @@ const App: React.FC = () => {
         </div>
 
         {error && (
-            <div className="bg-[--color-accent-red]/20 border border-[--color-accent-red] text-[--color-accent-red] p-4 rounded-lg text-center mb-8">
-                <h3 className="font-bold font-orbitron mb-2">:: SYSTEM ERROR ::</h3>
-                <p>{error}</p>
+            <div className="bg-[--color-bg-secondary] border border-[--color-error] text-[--color-error] p-4 rounded-lg text-center mb-8 shadow-lg"
+                 style={{ boxShadow: '0 0 20px rgba(255, 51, 102, 0.2)' }}>
+                <h3 className="font-bold font-orbitron mb-2 uppercase tracking-wider">:: SYSTEM ERROR ::</h3>
+                <p className="font-mono">{error}</p>
             </div>
         )}
 
@@ -370,17 +374,20 @@ const App: React.FC = () => {
           {missionAgents.length === 0 && !isLoading && <WelcomeMessage />}
           
           {isLoading && !isLoadingMessage.includes('FORGING') && (
-             <div className="flex flex-col justify-center items-center h-full text-[--color-accent-red] col-span-1 lg:col-span-12">
-                <SpinnerIcon className="animate-spin h-12 w-12 mb-4" />
-                <p className="text-xl font-orbitron tracking-widest">{isLoadingMessage || "PROCESSING..."}</p>
+             <div className="flex flex-col justify-center items-center h-full text-[--color-accent-cyan] col-span-1 lg:col-span-12">
+                <SpinnerIcon className="animate-spin h-12 w-12 mb-4" style={{ filter: 'drop-shadow(0 0 10px var(--color-glow-cyan))' }} />
+                <p className="text-xl font-orbitron tracking-widest uppercase"
+                   style={{ textShadow: '0 0 15px var(--color-glow-cyan)' }}>
+                   {isLoadingMessage || "PROCESSING..."}
+                </p>
             </div>
           )}
 
           {(missionAgents.length > 0 || isLoading) && (
             <>
               <div className="lg:col-span-4">
-                <MissionRoster 
-                  agents={missionAgents} 
+                <MissionRoster
+                  agents={missionAgents}
                   onSelectAgent={setActiveDetailView}
                   activeAgentId={activeDetailView?.id}
                   onClearRoster={handleClearRoster}
@@ -404,7 +411,7 @@ const App: React.FC = () => {
       </main>
       
       {editingAgent && (
-        <EditAgentModal 
+        <EditAgentModal
             agent={editingAgent}
             onClose={() => setEditingAgent(null)}
             onSave={handleUpdateAgent}
@@ -420,7 +427,7 @@ const App: React.FC = () => {
           />
       )}
 
-      <footer className="text-center p-4 text-xs text-[--color-text-med]">
+      <footer className="text-center p-4 text-xs text-[--color-text-muted] border-t border-[--color-border-primary]">
         Transform Army AI: Agent Manifest Forge & Exchange | For Standardized Agent Portability
       </footer>
     </div>
