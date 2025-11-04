@@ -68,4 +68,86 @@ You can import agent manifests from other teams or systems, even if they are not
     -   Add an `importMeta` block detailing the changes it made.
 4.  **Review:** The newly imported and normalized agent will appear in your roster. You can inspect it to see how the ACoC process has adapted it for your ecosystem.
 
+---
+
+## 5.0 Communicating with the Orchestrator
+
+The Orchestrator agent coordinates other agents and missions. You can interact with it via the UI, CLI, or API depending on your deployment.
+
+### 5.1 From the Forge UI
+
+- Forge or import an Orchestrator manifest (System Team → Orchestrator role).
+- Open the manifest details and review:
+  - `execution.command` and `args`
+  - `tools` exposed by the Orchestrator (e.g., task dispatch, roster status)
+  - `env.required` (configure these in your runtime)
+- Use the Mission Roster actions to export the Orchestrator and deploy it to your runtime environment.
+
+### 5.2 CLI Pattern (Example)
+
+Assuming your Orchestrator runs as a process and exposes a command interface:
+
+```bash
+# Ping orchestrator health
+./orchestrator --health
+
+# Dispatch a task to an agent
+./orchestrator --dispatch \
+  --agent-id red.recon.scout-01 \
+  --task '{"type":"scan","target":"10.0.0.0/24"}'
+
+# Query mission status
+./orchestrator --status --mission-id mission-2025-1104-001
+```
+
+Match these to your Orchestrator manifest’s `execution` and `tools` definitions.
+
+### 5.3 HTTP API Pattern (Example)
+
+If the Orchestrator exposes an HTTP API (common in containerized deployments):
+
+```bash
+# Create/dispatch task
+curl -s -X POST http://orchestrator.local/api/v1/tasks \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "agentId": "red.recon.scout-01",
+    "type": "scan",
+    "payload": { "target": "10.0.0.0/24" }
+  }'
+
+# Get task status
+curl -s http://orchestrator.local/api/v1/tasks/{taskId}
+```
+
+The exact endpoints should be reflected in the Orchestrator `tools` section (define input schemas and responses in the manifest for portability).
+
+### 5.4 WebSocket/Event Stream (Optional)
+
+For real-time mission updates, the Orchestrator may provide a WebSocket or event stream:
+
+```bash
+# Example WebSocket URL
+wss://orchestrator.local/ws
+```
+
+Subscribe to mission events (task queued, started, completed) and audit logs. Document the event schema in the manifest’s `tools` or an `events` annex.
+
+### 5.5 Environment & Security
+
+- Set all variables in `env.required` (API keys, broker URLs, database DSNs).
+- Run with least privilege; scope API keys to mission.
+- Prefer mTLS or token auth for HTTP/WebSocket control planes.
+- Log all directives and results for after-action review.
+
+### 5.6 ACoC Alignment
+
+When importing a foreign Orchestrator manifest:
+- ACoC normalization preserves identity, tools, and memory references.
+- Missing `env.required` are accumulated from tool `authVars`.
+- A default smoke test is added if missing to verify orchestration is reachable (e.g., `--health`).
+- An `importMeta` block is appended to document normalization changes.
+
+**Tip:** Keep Orchestrator `tools` small and composable (dispatch, query status, list agents). Route complex workflows through mission plans or higher-level runbooks.
+
 **End of Document.**

@@ -1,6 +1,7 @@
 
 import { AgentProfile, Team, AgentRole, Language, LLMProvider, SystemTeamRole, CustomTool, AgentV1, LanguageV1, ExecutionV1, ModelV1, PromptsV1, ToolV1, MemoryV1, EnvV1, TestV1, AgentStatus } from '../types';
 import { createLLMProvider } from './llmService';
+import { enforceACoCRules, validateAgentManifestBasic } from './manifestUtils';
 
 // Robust JSON parser that handles control characters and malformed JSON
 function parseJSONSafely(jsonString: string): any {
@@ -310,6 +311,14 @@ const agentV1Schema = {
                     expectedOutput: { type: "string" }
                 }
             }
+        },
+        importMeta: {
+            type: "object",
+            properties: {
+                normalizedBy: { type: "string" },
+                changes: { type: "array", items: { type: "string" } },
+                timestamp: { type: "string" }
+            }
         }
     },
     required: ['schemaVersion', 'id', 'name', 'version', 'description', 'author', 'language', 'execution', 'model', 'prompts', 'tools', 'memory', 'env', 'tests']
@@ -415,7 +424,15 @@ export const generateAgent = async (
     console.log('  - Last 200 chars:', jsonText.substring(Math.max(0, jsonText.length - 200)));
     
     // Use safe JSON parser that handles control characters
-    const agentManifest: AgentV1 = parseJSONSafely(jsonText);
+    let agentManifest: AgentV1 = parseJSONSafely(jsonText);
+    // Enforce ACoC rules and validate
+    const enforced = enforceACoCRules(agentManifest);
+    const validation = validateAgentManifestBasic(enforced.manifest);
+    if (!validation.valid) {
+      console.error('❌ [VALIDATION] Agent manifest failed validation:', validation.errors);
+      throw new Error(`Agent manifest failed validation: ${validation.errors.join('; ')}`);
+    }
+    agentManifest = enforced.manifest;
 
     const avatarBase64 = await generateAvatar(team, role);
 
@@ -510,7 +527,14 @@ export const normalizeAgent = async (foreignManifestJson: string, llmProvider: L
         console.log('  - Last 200 chars:', jsonText.substring(Math.max(0, jsonText.length - 200)));
         
         // Use safe JSON parser that handles control characters
-        const normalizedManifest: AgentV1 = parseJSONSafely(jsonText);
+        let normalizedManifest: AgentV1 = parseJSONSafely(jsonText);
+        const enforced = enforceACoCRules(normalizedManifest);
+        const validation = validateAgentManifestBasic(enforced.manifest);
+        if (!validation.valid) {
+          console.error('❌ [VALIDATION] Normalized manifest failed validation:', validation.errors);
+          throw new Error(`Normalized manifest failed validation: ${validation.errors.join('; ')}`);
+        }
+        normalizedManifest = enforced.manifest;
 
         // Determine Team/Role from manifest for UI purposes
         const name = normalizedManifest.name.toLowerCase();
