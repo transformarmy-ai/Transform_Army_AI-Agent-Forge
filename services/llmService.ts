@@ -261,75 +261,6 @@ export class OpenRouterProvider implements LLMProviderInterface {
   }
 }
 
-// Gemini Provider (using REST API directly)
-export class GeminiProvider implements LLMProviderInterface {
-  private apiKey: string;
-  private modelId: string;
-
-  constructor(apiKey: string, modelId: string = 'gemini-2.5-pro') {
-    this.apiKey = apiKey;
-    this.modelId = modelId;
-  }
-
-  getName(): string {
-    return 'Google Gemini';
-  }
-
-  async generateStructuredOutput(
-    prompt: string,
-    schema: any,
-    config?: LLMConfig
-  ): Promise<string> {
-    try {
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${this.modelId}:generateContent?key=${this.apiKey}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: {
-              responseMimeType: 'application/json',
-              responseSchema: schema,
-              temperature: config?.temperature ?? 0.7,
-              maxOutputTokens: config?.maxTokens ?? 4096,
-            },
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        const error = await response.text();
-        console.log('🔍 [DIAGNOSTIC] Gemini API Error Response:');
-        console.log('  - Status:', response.status);
-        console.log('  - Status Text:', response.statusText);
-        console.log('  - Error body:', error);
-        throw new Error(`Gemini API error: ${response.status} - ${error}`);
-      }
-
-      const data = await response.json();
-      const content = data.candidates[0].content.parts[0].text.trim();
-      
-      console.log('🔍 [DIAGNOSTIC] Gemini API Success Response:');
-      console.log('  - Raw content length:', content.length);
-      console.log('  - First 100 chars:', content.substring(0, 100));
-      
-      // Remove markdown code blocks if present
-      const cleanedContent = content.replace(/^```json\n/, '').replace(/```$/, '').trim();
-      console.log('🔍 [DIAGNOSTIC] Gemini API Cleaned Response:');
-      console.log('  - Cleaned content length:', cleanedContent.length);
-      console.log('  - First 100 chars:', cleanedContent.substring(0, 100));
-      
-      return cleanedContent;
-    } catch (error) {
-      console.error('Gemini provider error:', error);
-      throw new Error(`Failed to generate content with Gemini: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
-}
-
 // Factory function to create the appropriate provider
 export function createLLMProvider(
   provider: LLMProvider,
@@ -342,8 +273,6 @@ export function createLLMProvider(
   }
 
   switch (provider) {
-    case LLMProvider.Gemini:
-      return new GeminiProvider(config.apiKey, config.modelId);
     case LLMProvider.OpenAI:
       return new OpenAIProvider(config.apiKey, config.modelId);
     case LLMProvider.OpenRouter:
@@ -360,7 +289,6 @@ export function createLLMProvider(
 function getProviderConfig(provider: LLMProvider, modelName: string): { apiKey: string; modelId: string } {
   const getDefaultModel = () => {
     switch (provider) {
-      case LLMProvider.Gemini: return 'gemini-2.5-pro';
       case LLMProvider.OpenAI: return 'gpt-4o';
       case LLMProvider.OpenRouter: return 'mistralai/mistral-large';
       case LLMProvider.Anthropic: return 'claude-3-5-sonnet-20241022';
@@ -370,17 +298,6 @@ function getProviderConfig(provider: LLMProvider, modelName: string): { apiKey: 
 
   let apiKey = '';
   switch (provider) {
-    case LLMProvider.Gemini:
-      // DIAGNOSTIC LOG: Check both potential API key sources
-      const geminiKey1 = process.env.API_KEY;
-      const geminiKey2 = process.env.GEMINI_API_KEY;
-      console.log('🔍 [DIAGNOSTIC] Gemini API Key Check:');
-      console.log('  - process.env.API_KEY:', geminiKey1 ? 'SET' : 'MISSING');
-      console.log('  - process.env.GEMINI_API_KEY:', geminiKey2 ? 'SET' : 'MISSING');
-      apiKey = geminiKey1 || geminiKey2 || '';
-      console.log('  - Final apiKey:', apiKey ? 'SET' : 'MISSING');
-      console.log('  - Provider selected:', provider);
-      break;
     case LLMProvider.OpenAI:
       const openaiKey = process.env.OPENAI_API_KEY;
       console.log('🔍 [DIAGNOSTIC] OpenAI API Key Check:');

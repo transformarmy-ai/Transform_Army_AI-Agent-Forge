@@ -13,7 +13,6 @@ export enum Language {
 }
 
 export enum LLMProvider {
-  Gemini = 'Google Gemini',
   OpenAI = 'OpenAI',
   OpenRouter = 'OpenRouter',
   Anthropic = 'Anthropic',

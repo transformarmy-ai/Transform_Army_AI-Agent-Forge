@@ -253,7 +253,8 @@ const App: React.FC = () => {
 
     try {
         const fileContent = await file.text();
-        const normalizedProfile = await normalizeAgent(fileContent);
+        console.log(`🔧 [IMPORT FIX] Using user-selected provider: ${selectedLLMProvider} for normalization`);
+        const normalizedProfile = await normalizeAgent(fileContent, selectedLLMProvider, modelName);
 
         setMissionAgents(prev => [...prev, normalizedProfile]);
         addLogEntry('ACoC', `Successfully imported and normalized ${normalizedProfile.manifest.name}.`, normalizedProfile.manifest);
@@ -292,11 +293,14 @@ const App: React.FC = () => {
             
             const allCustomToolsForAgent = customTools.filter(ct => (agentConfig.tools || []).includes(ct.name));
             
+            // Override template's provider with user's selected provider
+            console.log(`🔧 [TEMPLATE FIX] Using user-selected provider: ${selectedLLMProvider} (overriding template default: ${agentConfig.llmProvider})`);
+            
             const profile = await generateAgent(
                 agentConfig.team,
                 agentConfig.role,
                 agentConfig.language,
-                agentConfig.llmProvider,
+                selectedLLMProvider,  // Use user's selected provider
                 agentConfig.modelName || '',
                 agentConfig.tools || [],
                 allCustomToolsForAgent

@@ -102,8 +102,7 @@ const agentV1Schema = {
 };
 
 const getBasePrompt = (team: Team, role: AgentRole, language: Language, llmProvider: LLMProvider, modelName: string, customTools: ToolV1[]) => {
-  const defaultModelId = llmProvider === LLMProvider.Gemini ? 'gemini-2.5-pro' : 
-                         llmProvider === LLMProvider.OpenAI ? 'gpt-4o' : 
+  const defaultModelId = llmProvider === LLMProvider.OpenAI ? 'gpt-4o' :
                          llmProvider === LLMProvider.OpenRouter ? 'mistralai/mistral-large' :
                          llmProvider === LLMProvider.Anthropic ? 'claude-3-5-sonnet-20241022' : 'gpt-4o';
   const finalModelName = modelName.trim() || defaultModelId;
@@ -213,7 +212,7 @@ export const generateAgent = async (
   }
 };
 
-export const normalizeAgent = async (foreignManifestJson: string): Promise<AgentProfile> => {
+export const normalizeAgent = async (foreignManifestJson: string, llmProvider: LLMProvider, modelName: string): Promise<AgentProfile> => {
     const prompt = `
         You are an agent manifest normalization engine. Your task is to apply the "Agent Change of Command (ACoC)" rules to the provided foreign agent manifest and output a compliant 'agent.v1' manifest.
 
@@ -236,8 +235,9 @@ export const normalizeAgent = async (foreignManifestJson: string): Promise<Agent
     `;
 
     try {
-        // Use default provider (Gemini) for normalization
-        const llmProviderInstance = createLLMProvider(LLMProvider.Gemini, 'gemini-2.5-pro');
+        // Use user-selected provider for normalization
+        console.log(`🔧 [NORMALIZE FIX] Using provider: ${llmProvider} with model: ${modelName || 'default'}`);
+        const llmProviderInstance = createLLMProvider(llmProvider, modelName);
         
         if (!llmProviderInstance) {
           throw new Error('Failed to create LLM provider for normalization. Please check your API keys.');

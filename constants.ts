@@ -3,7 +3,7 @@ import { Team, Language, RedTeamRole, BlueTeamRole, LLMProvider, SystemTeamRole,
 
 export const TEAMS = [Team.System, Team.Red, Team.Blue];
 export const LANGUAGES = [Language.Python, Language.JavaScript, Language.Go, Language.Rust];
-export const LLM_PROVIDERS = [LLMProvider.Gemini, LLMProvider.OpenAI, LLMProvider.OpenRouter, LLMProvider.Anthropic];
+export const LLM_PROVIDERS = [LLMProvider.OpenAI, LLMProvider.OpenRouter, LLMProvider.Anthropic];
 
 // A programmatically generated SVG gear logo, themed to match the cyber-military app.
 // This is a self-contained data URL, making the app portable.
@@ -86,124 +86,124 @@ export const AVAILABLE_TOOLS_BY_ROLE: { [key in AgentRole]?: string[] } = {
     [BlueTeamRole.AssetInventory]: ['query_logs_osquery', ...BASE_TACTICAL_TOOLS],
 };
 
-const PYTHON_GEMINI = { language: Language.Python, llmProvider: LLMProvider.Gemini };
+const PYTHON_OPENROUTER = { language: Language.Python, llmProvider: LLMProvider.OpenRouter };
 
 export const MISSION_TEMPLATES: MissionTemplate[] = [
   // Red Team Templates
   { name: 'Red: Standard Pentest Squad', description: 'A balanced offensive team for general penetration testing.', agents: [
-      { team: Team.System, role: SystemTeamRole.Orchestrator, ...PYTHON_GEMINI },
-      { team: Team.System, role: SystemTeamRole.RedTeamArmory, ...PYTHON_GEMINI },
-      { team: Team.Red, role: RedTeamRole.Reconnaissance, ...PYTHON_GEMINI, tools: ['nmap_scan', 'theharvester_search'] },
-      { team: Team.Red, role: RedTeamRole.VulnerabilityScanning, ...PYTHON_GEMINI, tools: ['sqlmap_scan', 'nikto_scan'] },
+      { team: Team.System, role: SystemTeamRole.Orchestrator, ...PYTHON_OPENROUTER },
+      { team: Team.System, role: SystemTeamRole.RedTeamArmory, ...PYTHON_OPENROUTER },
+      { team: Team.Red, role: RedTeamRole.Reconnaissance, ...PYTHON_OPENROUTER, tools: ['nmap_scan', 'theharvester_search'] },
+      { team: Team.Red, role: RedTeamRole.VulnerabilityScanning, ...PYTHON_OPENROUTER, tools: ['sqlmap_scan', 'nikto_scan'] },
   ]},
   { name: 'Red: Initial Recon & Probe', description: 'A lightweight team focused on initial access and intelligence gathering.', agents: [
-      { team: Team.System, role: SystemTeamRole.Orchestrator, ...PYTHON_GEMINI },
-      { team: Team.System, role: SystemTeamRole.RedTeamArmory, ...PYTHON_GEMINI },
-      { team: Team.Red, role: RedTeamRole.Reconnaissance, ...PYTHON_GEMINI, tools: ['nmap_scan', 'theharvester_search'] },
+      { team: Team.System, role: SystemTeamRole.Orchestrator, ...PYTHON_OPENROUTER },
+      { team: Team.System, role: SystemTeamRole.RedTeamArmory, ...PYTHON_OPENROUTER },
+      { team: Team.Red, role: RedTeamRole.Reconnaissance, ...PYTHON_OPENROUTER, tools: ['nmap_scan', 'theharvester_search'] },
   ]},
   { name: 'Red: Web Application Assault', description: 'A specialized team for targeting and exploiting web applications.', agents: [
-      { team: Team.System, role: SystemTeamRole.Orchestrator, ...PYTHON_GEMINI },
-      { team: Team.System, role: SystemTeamRole.RedTeamArmory, ...PYTHON_GEMINI },
-      { team: Team.Red, role: RedTeamRole.Reconnaissance, ...PYTHON_GEMINI, tools: ['nmap_scan'] },
-      { team: Team.Red, role: RedTeamRole.VulnerabilityScanning, ...PYTHON_GEMINI, tools: ['sqlmap_scan', 'nikto_scan'] },
+      { team: Team.System, role: SystemTeamRole.Orchestrator, ...PYTHON_OPENROUTER },
+      { team: Team.System, role: SystemTeamRole.RedTeamArmory, ...PYTHON_OPENROUTER },
+      { team: Team.Red, role: RedTeamRole.Reconnaissance, ...PYTHON_OPENROUTER, tools: ['nmap_scan'] },
+      { team: Team.Red, role: RedTeamRole.VulnerabilityScanning, ...PYTHON_OPENROUTER, tools: ['sqlmap_scan', 'nikto_scan'] },
   ]},
   { name: 'Red: Social Engineering Campaign', description: 'A team focused on human-factor exploits and phishing.', agents: [
-      { team: Team.System, role: SystemTeamRole.Orchestrator, ...PYTHON_GEMINI },
-      { team: Team.System, role: SystemTeamRole.RedTeamArmory, ...PYTHON_GEMINI },
-      { team: Team.Red, role: RedTeamRole.Reconnaissance, ...PYTHON_GEMINI, tools: ['theharvester_search'] },
-      { team: Team.Red, role: RedTeamRole.SocialEngineering, ...PYTHON_GEMINI, tools: [] },
+      { team: Team.System, role: SystemTeamRole.Orchestrator, ...PYTHON_OPENROUTER },
+      { team: Team.System, role: SystemTeamRole.RedTeamArmory, ...PYTHON_OPENROUTER },
+      { team: Team.Red, role: RedTeamRole.Reconnaissance, ...PYTHON_OPENROUTER, tools: ['theharvester_search'] },
+      { team: Team.Red, role: RedTeamRole.SocialEngineering, ...PYTHON_OPENROUTER, tools: [] },
   ]},
   { name: 'Red: Payload Operations', description: 'A team for developing, delivering, and executing custom payloads.', agents: [
-      { team: Team.System, role: SystemTeamRole.Orchestrator, ...PYTHON_GEMINI },
-      { team: Team.System, role: SystemTeamRole.RedTeamArmory, ...PYTHON_GEMINI },
-      { team: Team.Red, role: RedTeamRole.PayloadDelivery, ...PYTHON_GEMINI },
+      { team: Team.System, role: SystemTeamRole.Orchestrator, ...PYTHON_OPENROUTER },
+      { team: Team.System, role: SystemTeamRole.RedTeamArmory, ...PYTHON_OPENROUTER },
+      { team: Team.Red, role: RedTeamRole.PayloadDelivery, ...PYTHON_OPENROUTER },
   ]},
   // 5 more red team
   { name: 'Red: Full Spectrum Infiltration', description: 'A comprehensive team for deep network infiltration and lateral movement.', agents: [
-      { team: Team.System, role: SystemTeamRole.Orchestrator, ...PYTHON_GEMINI },
-      { team: Team.System, role: SystemTeamRole.RedTeamArmory, ...PYTHON_GEMINI },
-      { team: Team.Red, role: RedTeamRole.Reconnaissance, ...PYTHON_GEMINI, tools: ['nmap_scan'] },
-      { team: Team.Red, role: RedTeamRole.VulnerabilityScanning, ...PYTHON_GEMINI, tools: ['sqlmap_scan'] },
-      { team: Team.Red, role: RedTeamRole.PayloadDelivery, ...PYTHON_GEMINI },
+      { team: Team.System, role: SystemTeamRole.Orchestrator, ...PYTHON_OPENROUTER },
+      { team: Team.System, role: SystemTeamRole.RedTeamArmory, ...PYTHON_OPENROUTER },
+      { team: Team.Red, role: RedTeamRole.Reconnaissance, ...PYTHON_OPENROUTER, tools: ['nmap_scan'] },
+      { team: Team.Red, role: RedTeamRole.VulnerabilityScanning, ...PYTHON_OPENROUTER, tools: ['sqlmap_scan'] },
+      { team: Team.Red, role: RedTeamRole.PayloadDelivery, ...PYTHON_OPENROUTER },
   ]},
   { name: 'Red: OSINT Deep Dive', description: 'A single-purpose team for extensive open-source intelligence gathering.', agents: [
-      { team: Team.System, role: SystemTeamRole.Orchestrator, ...PYTHON_GEMINI },
-      { team: Team.System, role: SystemTeamRole.RedTeamArmory, ...PYTHON_GEMINI },
-      { team: Team.Red, role: RedTeamRole.Reconnaissance, ...PYTHON_GEMINI, tools: ['theharvester_search'] },
+      { team: Team.System, role: SystemTeamRole.Orchestrator, ...PYTHON_OPENROUTER },
+      { team: Team.System, role: SystemTeamRole.RedTeamArmory, ...PYTHON_OPENROUTER },
+      { team: Team.Red, role: RedTeamRole.Reconnaissance, ...PYTHON_OPENROUTER, tools: ['theharvester_search'] },
   ]},
   { name: 'Red: Network Sweep & Map', description: 'A quick-deployment team to map a target network.', agents: [
-      { team: Team.System, role: SystemTeamRole.Orchestrator, ...PYTHON_GEMINI },
-      { team: Team.System, role: SystemTeamRole.RedTeamArmory, ...PYTHON_GEMINI },
-      { team: Team.Red, role: RedTeamRole.Reconnaissance, ...PYTHON_GEMINI, tools: ['nmap_scan'] },
+      { team: Team.System, role: SystemTeamRole.Orchestrator, ...PYTHON_OPENROUTER },
+      { team: Team.System, role: SystemTeamRole.RedTeamArmory, ...PYTHON_OPENROUTER },
+      { team: Team.Red, role: RedTeamRole.Reconnaissance, ...PYTHON_OPENROUTER, tools: ['nmap_scan'] },
   ]},
   { name: 'Red: SQLi Strike Team', description: 'A specialized team to find and exploit SQL injection vulnerabilities.', agents: [
-      { team: Team.System, role: SystemTeamRole.Orchestrator, ...PYTHON_GEMINI },
-      { team: Team.System, role: SystemTeamRole.RedTeamArmory, ...PYTHON_GEMINI },
-      { team: Team.Red, role: RedTeamRole.VulnerabilityScanning, ...PYTHON_GEMINI, tools: ['sqlmap_scan'] },
+      { team: Team.System, role: SystemTeamRole.Orchestrator, ...PYTHON_OPENROUTER },
+      { team: Team.System, role: SystemTeamRole.RedTeamArmory, ...PYTHON_OPENROUTER },
+      { team: Team.Red, role: RedTeamRole.VulnerabilityScanning, ...PYTHON_OPENROUTER, tools: ['sqlmap_scan'] },
   ]},
   { name: 'Red: Phishing & Payload', description: 'A two-pronged team for social engineering and payload delivery.', agents: [
-      { team: Team.System, role: SystemTeamRole.Orchestrator, ...PYTHON_GEMINI },
-      { team: Team.System, role: SystemTeamRole.RedTeamArmory, ...PYTHON_GEMINI },
-      { team: Team.Red, role: RedTeamRole.SocialEngineering, ...PYTHON_GEMINI },
-      { team: Team.Red, role: RedTeamRole.PayloadDelivery, ...PYTHON_GEMINI },
+      { team: Team.System, role: SystemTeamRole.Orchestrator, ...PYTHON_OPENROUTER },
+      { team: Team.System, role: SystemTeamRole.RedTeamArmory, ...PYTHON_OPENROUTER },
+      { team: Team.Red, role: RedTeamRole.SocialEngineering, ...PYTHON_OPENROUTER },
+      { team: Team.Red, role: RedTeamRole.PayloadDelivery, ...PYTHON_OPENROUTER },
   ]},
   
   // Blue Team Templates
   { name: 'Blue: Standard SOC', description: 'A balanced defensive team for general threat hunting and log analysis.', agents: [
-      { team: Team.System, role: SystemTeamRole.Orchestrator, ...PYTHON_GEMINI },
-      { team: Team.System, role: SystemTeamRole.BlueTeamGarrison, ...PYTHON_GEMINI },
-      { team: Team.Blue, role: BlueTeamRole.LogAnalysis, ...PYTHON_GEMINI, tools: ['query_logs_osquery'] },
-      { team: Team.Blue, role: BlueTeamRole.ThreatHunting, ...PYTHON_GEMINI, tools: ['scan_file_clamav', 'check_ip_virustotal'] },
+      { team: Team.System, role: SystemTeamRole.Orchestrator, ...PYTHON_OPENROUTER },
+      { team: Team.System, role: SystemTeamRole.BlueTeamGarrison, ...PYTHON_OPENROUTER },
+      { team: Team.Blue, role: BlueTeamRole.LogAnalysis, ...PYTHON_OPENROUTER, tools: ['query_logs_osquery'] },
+      { team: Team.Blue, role: BlueTeamRole.ThreatHunting, ...PYTHON_OPENROUTER, tools: ['scan_file_clamav', 'check_ip_virustotal'] },
   ]},
   { name: 'Blue: Incident Response Unit', description: 'A rapid-response team for investigating and containing active threats.', agents: [
-      { team: Team.System, role: SystemTeamRole.Orchestrator, ...PYTHON_GEMINI },
-      { team: Team.System, role: SystemTeamRole.BlueTeamGarrison, ...PYTHON_GEMINI },
-      { team: Team.Blue, role: BlueTeamRole.LogAnalysis, ...PYTHON_GEMINI, tools: ['query_logs_osquery'] },
-      { team: Team.Blue, role: BlueTeamRole.IncidentResponse, ...PYTHON_GEMINI },
+      { team: Team.System, role: SystemTeamRole.Orchestrator, ...PYTHON_OPENROUTER },
+      { team: Team.System, role: SystemTeamRole.BlueTeamGarrison, ...PYTHON_OPENROUTER },
+      { team: Team.Blue, role: BlueTeamRole.LogAnalysis, ...PYTHON_OPENROUTER, tools: ['query_logs_osquery'] },
+      { team: Team.Blue, role: BlueTeamRole.IncidentResponse, ...PYTHON_OPENROUTER },
   ]},
   { name: 'Blue: Endpoint Threat Hunt', description: 'A specialized team for deep investigation of endpoint logs and behavior.', agents: [
-      { team: Team.System, role: SystemTeamRole.Orchestrator, ...PYTHON_GEMINI },
-      { team: Team.System, role: SystemTeamRole.BlueTeamGarrison, ...PYTHON_GEMINI },
-      { team: Team.Blue, role: BlueTeamRole.AssetInventory, ...PYTHON_GEMINI, tools: ['query_logs_osquery'] },
-      { team: Team.Blue, role: BlueTeamRole.ThreatHunting, ...PYTHON_GEMINI, tools: ['scan_file_clamav'] },
+      { team: Team.System, role: SystemTeamRole.Orchestrator, ...PYTHON_OPENROUTER },
+      { team: Team.System, role: SystemTeamRole.BlueTeamGarrison, ...PYTHON_OPENROUTER },
+      { team: Team.Blue, role: BlueTeamRole.AssetInventory, ...PYTHON_OPENROUTER, tools: ['query_logs_osquery'] },
+      { team: Team.Blue, role: BlueTeamRole.ThreatHunting, ...PYTHON_OPENROUTER, tools: ['scan_file_clamav'] },
   ]},
   { name: 'Blue: Network Traffic Analysis', description: 'A team focused on analyzing network captures for malicious activity.', agents: [
-      { team: Team.System, role: SystemTeamRole.Orchestrator, ...PYTHON_GEMINI },
-      { team: Team.System, role: SystemTeamRole.BlueTeamGarrison, ...PYTHON_GEMINI },
-      { team: Team.Blue, role: BlueTeamRole.LogAnalysis, ...PYTHON_GEMINI, tools: ['analyze_pcap_tshark'] },
+      { team: Team.System, role: SystemTeamRole.Orchestrator, ...PYTHON_OPENROUTER },
+      { team: Team.System, role: SystemTeamRole.BlueTeamGarrison, ...PYTHON_OPENROUTER },
+      { team: Team.Blue, role: BlueTeamRole.LogAnalysis, ...PYTHON_OPENROUTER, tools: ['analyze_pcap_tshark'] },
   ]},
   { name: 'Blue: Malware Analysis', description: 'A team for scanning and analyzing potentially malicious files.', agents: [
-      { team: Team.System, role: SystemTeamRole.Orchestrator, ...PYTHON_GEMINI },
-      { team: Team.System, role: SystemTeamRole.BlueTeamGarrison, ...PYTHON_GEMINI },
-      { team: Team.Blue, role: BlueTeamRole.ThreatHunting, ...PYTHON_GEMINI, tools: ['scan_file_clamav'] },
+      { team: Team.System, role: SystemTeamRole.Orchestrator, ...PYTHON_OPENROUTER },
+      { team: Team.System, role: SystemTeamRole.BlueTeamGarrison, ...PYTHON_OPENROUTER },
+      { team: Team.Blue, role: BlueTeamRole.ThreatHunting, ...PYTHON_OPENROUTER, tools: ['scan_file_clamav'] },
   ]},
     // 5 more blue team
   { name: 'Blue: Full Incident Response', description: 'A comprehensive team for end-to-end incident handling.', agents: [
-      { team: Team.System, role: SystemTeamRole.Orchestrator, ...PYTHON_GEMINI },
-      { team: Team.System, role: SystemTeamRole.BlueTeamGarrison, ...PYTHON_GEMINI },
-      { team: Team.Blue, role: BlueTeamRole.LogAnalysis, ...PYTHON_GEMINI },
-      { team: Team.Blue, role: BlueTeamRole.ThreatHunting, ...PYTHON_GEMINI },
-      { team: Team.Blue, role: BlueTeamRole.IncidentResponse, ...PYTHON_GEMINI },
+      { team: Team.System, role: SystemTeamRole.Orchestrator, ...PYTHON_OPENROUTER },
+      { team: Team.System, role: SystemTeamRole.BlueTeamGarrison, ...PYTHON_OPENROUTER },
+      { team: Team.Blue, role: BlueTeamRole.LogAnalysis, ...PYTHON_OPENROUTER },
+      { team: Team.Blue, role: BlueTeamRole.ThreatHunting, ...PYTHON_OPENROUTER },
+      { team: Team.Blue, role: BlueTeamRole.IncidentResponse, ...PYTHON_OPENROUTER },
   ]},
   { name: 'Blue: Asset & Log Review', description: 'A foundational team for inventory and log baseline analysis.', agents: [
-      { team: Team.System, role: SystemTeamRole.Orchestrator, ...PYTHON_GEMINI },
-      { team: Team.System, role: SystemTeamRole.BlueTeamGarrison, ...PYTHON_GEMINI },
-      { team: Team.Blue, role: BlueTeamRole.AssetInventory, ...PYTHON_GEMINI },
-      { team: Team.Blue, role: BlueTeamRole.LogAnalysis, ...PYTHON_GEMINI },
+      { team: Team.System, role: SystemTeamRole.Orchestrator, ...PYTHON_OPENROUTER },
+      { team: Team.System, role: SystemTeamRole.BlueTeamGarrison, ...PYTHON_OPENROUTER },
+      { team: Team.Blue, role: BlueTeamRole.AssetInventory, ...PYTHON_OPENROUTER },
+      { team: Team.Blue, role: BlueTeamRole.LogAnalysis, ...PYTHON_OPENROUTER },
   ]},
   { name: 'Blue: Threat Intel Sweep', description: 'A proactive team to hunt for known IOCs based on external intel.', agents: [
-      { team: Team.System, role: SystemTeamRole.Orchestrator, ...PYTHON_GEMINI },
-      { team: Team.System, role: SystemTeamRole.BlueTeamGarrison, ...PYTHON_GEMINI },
-      { team: Team.Blue, role: BlueTeamRole.ThreatHunting, ...PYTHON_GEMINI, tools: ['check_ip_virustotal'] },
+      { team: Team.System, role: SystemTeamRole.Orchestrator, ...PYTHON_OPENROUTER },
+      { team: Team.System, role: SystemTeamRole.BlueTeamGarrison, ...PYTHON_OPENROUTER },
+      { team: Team.Blue, role: BlueTeamRole.ThreatHunting, ...PYTHON_OPENROUTER, tools: ['check_ip_virustotal'] },
   ]},
   { name: 'Blue: OSQuery Deep Dive', description: 'A specialized team for extensive endpoint querying with osquery.', agents: [
-      { team: Team.System, role: SystemTeamRole.Orchestrator, ...PYTHON_GEMINI },
-      { team: Team.System, role: SystemTeamRole.BlueTeamGarrison, ...PYTHON_GEMINI },
-      { team: Team.Blue, role: BlueTeamRole.LogAnalysis, ...PYTHON_GEMINI, tools: ['query_logs_osquery'] },
+      { team: Team.System, role: SystemTeamRole.Orchestrator, ...PYTHON_OPENROUTER },
+      { team: Team.System, role: SystemTeamRole.BlueTeamGarrison, ...PYTHON_OPENROUTER },
+      { team: Team.Blue, role: BlueTeamRole.LogAnalysis, ...PYTHON_OPENROUTER, tools: ['query_logs_osquery'] },
   ]},
   { name: 'Blue: PCAP Analysis Unit', description: 'A single-purpose team for deep analysis of network packet captures.', agents: [
-      { team: Team.System, role: SystemTeamRole.Orchestrator, ...PYTHON_GEMINI },
-      { team: Team.System, role: SystemTeamRole.BlueTeamGarrison, ...PYTHON_GEMINI },
-      { team: Team.Blue, role: BlueTeamRole.LogAnalysis, ...PYTHON_GEMINI, tools: ['analyze_pcap_tshark'] },
+      { team: Team.System, role: SystemTeamRole.Orchestrator, ...PYTHON_OPENROUTER },
+      { team: Team.System, role: SystemTeamRole.BlueTeamGarrison, ...PYTHON_OPENROUTER },
+      { team: Team.Blue, role: BlueTeamRole.LogAnalysis, ...PYTHON_OPENROUTER, tools: ['analyze_pcap_tshark'] },
   ]},
 ];

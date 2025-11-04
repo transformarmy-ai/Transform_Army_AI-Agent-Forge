@@ -83,9 +83,8 @@ const AgentControlPanel: React.FC<AgentControlPanelProps> = ({
         return 'e.g., mistralai/mistral-large';
       case LLMProvider.Anthropic:
         return 'e.g., claude-3-5-sonnet-20241022';
-      case LLMProvider.Gemini:
       default:
-        return 'e.g., gemini-2.5-pro';
+        return 'e.g., mistralai/mistral-large';
     }
   };
 

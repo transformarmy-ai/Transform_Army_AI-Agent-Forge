@@ -14,14 +14,12 @@ RUN npm install
 COPY . .
 
 # Accept build arguments for API keys
-ARG GEMINI_API_KEY
 ARG OPENAI_API_KEY
 ARG OPENROUTER_API_KEY
 ARG ANTHROPIC_API_KEY
 
 # Create .env file from build arguments
-RUN echo "GEMINI_API_KEY=${GEMINI_API_KEY}" > .env && \
-    echo "OPENAI_API_KEY=${OPENAI_API_KEY}" >> .env && \
+RUN echo "OPENAI_API_KEY=${OPENAI_API_KEY}" > .env && \
     echo "OPENROUTER_API_KEY=${OPENROUTER_API_KEY}" >> .env && \
     echo "ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}" >> .env
 
