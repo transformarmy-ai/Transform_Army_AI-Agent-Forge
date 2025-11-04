@@ -12,6 +12,8 @@ function parseJSONSafely(jsonString: string): any {
     
     // Try to extract JSON from markdown code blocks more aggressively
     let cleaned = jsonString.trim();
+    // Remove BOM and unicode line/paragraph separators
+    cleaned = cleaned.replace(/^\uFEFF/, '').replace(/[\u2028\u2029]/g, '');
     
     // Remove markdown code blocks (various formats)
     cleaned = cleaned.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '').trim();
@@ -175,6 +177,12 @@ function parseJSONSafely(jsonString: string): any {
         // Remove any non-printable characters that might be lingering
         aggressive = aggressive.replace(/[^\x20-\x7E\n\r\t]/g, '');
         
+        // Fix common double-escape issues
+        aggressive = aggressive
+          .replace(/\\\\"/g, '\\"')   // \" -> "
+          .replace(/([^\\])\\\\n/g, '$1\\n')
+          .replace(/([^\\])\\\\t/g, '$1\\t');
+        
         // Try to parse the aggressively cleaned version
         const parsed = JSON.parse(aggressive);
         console.log('✅ [JSON PARSE] Successfully parsed after aggressive repair');
@@ -317,6 +325,15 @@ const getBasePrompt = (team: Team, role: AgentRole, language: Language, llmProvi
   return `
     You are building an agent manifest for my Transform Army AI ecosystem. Your output MUST be a single JSON object that is fully compliant with the 'agent.v1' schema I will provide.
 
+    IMPORTANT: STRICT JSON RULES YOU MUST FOLLOW EXACTLY
+    - Return ONLY the JSON object. No markdown code fences, no prose, no explanations.
+    - Use double quotes for all property names and all string values.
+    - Escape control characters in strings: use \\n for newlines, \\t for tabs, \\" for quotes.
+    - Do NOT include trailing commas in arrays or objects.
+    - Do NOT include any comments (no // or /* */).
+    - Ensure all brackets and braces are properly matched and closed.
+    - Do not include special characters outside of proper JSON escapes.
+
     **Core Requirements Document:**
     - Every agent must output a manifest with \`schemaVersion: "agent.v1"\`.
     - Every agent must declare language and execution.
@@ -387,7 +404,7 @@ export const generateAgent = async (
     const jsonText = await llmProviderInstance.generateStructuredOutput(
       prompt,
       agentV1Schema,
-      { temperature: 0.7 }
+      { temperature: 0.2 }
     );
     
     // DIAGNOSTIC LOG: Log the raw response before parsing
@@ -417,6 +434,33 @@ export const generateAgent = async (
     console.error("Error generating agent manifest:", error);
     throw new Error("Failed to generate agent manifest from AI. Please check your API key and network connection.");
   }
+};
+
+export const generateAgentWithRetry = async (
+  team: Team,
+  role: AgentRole,
+  language: Language,
+  llmProvider: LLMProvider,
+  modelName: string,
+  selectedTools: string[],
+  customTools: CustomTool[],
+  maxRetries: number = 3
+): Promise<AgentProfile> => {
+  let lastError: unknown = null;
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`🔄 [RETRY] Attempt ${attempt}/${maxRetries}`);
+      return await generateAgent(team, role, language, llmProvider, modelName, selectedTools, customTools);
+    } catch (err) {
+      lastError = err;
+      console.warn(`⚠️ [RETRY] Attempt ${attempt} failed:`, err instanceof Error ? err.message : String(err));
+      if (attempt < maxRetries) {
+        const delayMs = Math.min(1000 * Math.pow(2, attempt - 1), 5000);
+        await new Promise(res => setTimeout(res, delayMs));
+      }
+    }
+  }
+  throw new Error(`Failed to generate agent after ${maxRetries} attempts: ${lastError instanceof Error ? lastError.message : String(lastError)}`);
 };
 
 export const normalizeAgent = async (foreignManifestJson: string, llmProvider: LLMProvider, modelName: string): Promise<AgentProfile> => {
@@ -455,7 +499,7 @@ export const normalizeAgent = async (foreignManifestJson: string, llmProvider: L
         const jsonText = await llmProviderInstance.generateStructuredOutput(
           prompt,
           agentV1Schema,
-          { temperature: 0.5 }
+          { temperature: 0.2 }
         );
         
         // DIAGNOSTIC LOG: Log the raw response before parsing

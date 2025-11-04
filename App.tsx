@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import JSZip from 'jszip';
 import { Team, AgentRole, Language, AgentProfile, SystemTeamRole, LLMProvider, AgentStatus, CustomTool, TemplateAgentConfig, MissionTemplate, IntelFile, AgentTeamV1, OrchestratorV1, AgentV1 } from './types';
 import { TEAMS, LANGUAGES, ROLES_BY_TEAM, LLM_PROVIDERS, AVAILABLE_TOOLS_BY_ROLE, MISSION_TEMPLATES } from './constants';
-import { generateAgent, normalizeAgent, generateAvatar } from './services/geminiService';
+import { generateAgentWithRetry, normalizeAgent, generateAvatar } from './services/geminiService';
 import Header from './components/Header';
 import AgentControlPanel from './components/AgentControlPanel';
 import DocumentationDisplay from './components/DocumentationDisplay';
@@ -136,7 +136,7 @@ const App: React.FC = () => {
       addLogEntry("AgentForge", `Initiating manifest forge for ${role} agent...`);
       const allCustomTools = customTools.filter(ct => tools.includes(ct.name));
       
-      const profile = await generateAgent(team, role, language, llmProvider, model, tools, allCustomTools);
+      const profile = await generateAgentWithRetry(team, role, language, llmProvider, model, tools, allCustomTools, 3);
 
       setMissionAgents(prevAgents => [...prevAgents, profile]);
       addLogEntry("AgentForge", `Successfully forged manifest: ${profile.manifest.name}.`, profile.manifest);
@@ -296,14 +296,15 @@ const App: React.FC = () => {
             // Override template's provider with user's selected provider
             console.log(`🔧 [TEMPLATE FIX] Using user-selected provider: ${selectedLLMProvider} (overriding template default: ${agentConfig.llmProvider})`);
             
-            const profile = await generateAgent(
+            const profile = await generateAgentWithRetry(
                 agentConfig.team,
                 agentConfig.role,
                 agentConfig.language,
                 selectedLLMProvider,  // Use user's selected provider
                 agentConfig.modelName || '',
                 agentConfig.tools || [],
-                allCustomToolsForAgent
+                allCustomToolsForAgent,
+                3
             );
             newAgents.push(profile);
             addLogEntry("AgentForge", `(Template) Forged manifest: ${profile.manifest.name}.`);
