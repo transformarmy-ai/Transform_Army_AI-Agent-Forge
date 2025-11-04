@@ -5,9 +5,9 @@ export const TEAMS = [Team.System, Team.Red, Team.Blue];
 export const LANGUAGES = [Language.Python, Language.JavaScript, Language.Go, Language.Rust];
 export const LLM_PROVIDERS = [LLMProvider.OpenAI, LLMProvider.OpenRouter, LLMProvider.Anthropic];
 
-// A programmatically generated SVG gear logo, themed to match the cyber-military app.
-// This is a self-contained data URL, making the app portable.
-const gearSvg = `
+// Transform Army AI Logo - Hacker/Patriotic Theme
+// Shield with circuit board pattern and stylized "TA" monogram
+const transformArmyLogoSvg = `
 <svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <filter id="dropshadow" height="130%">
@@ -18,37 +18,73 @@ const gearSvg = `
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
-    <filter id="cyberGlow">
+    <filter id="redGlow">
       <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
       <feMerge>
         <feMergeNode in="coloredBlur"/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
-    <linearGradient id="cyanGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#00FFFF;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#00BFFF;stop-opacity:1" />
+    <filter id="blueGlow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <linearGradient id="redGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#DC143C;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF1744;stop-opacity:1" />
     </linearGradient>
+    <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00308F;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0052CC;stop-opacity:1" />
+    </linearGradient>
+    <pattern id="circuitPattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M 0,10 L 10,10 L 10,0 M 10,10 L 20,10 M 10,10 L 10,20" stroke="#DC143C" stroke-width="0.5" fill="none" opacity="0.3"/>
+      <circle cx="10" cy="10" r="1" fill="#DC143C" opacity="0.5"/>
+    </pattern>
   </defs>
-  <g transform="rotate(15 50 50)" style="filter:url(#dropshadow)">
-    <path
-      d="M 50,12 A 38,38 0 0,1 50,88 A 38,38 0 0,1 50,12 M 50,22 A 28,28 0 0,0 50,78 A 28,28 0 0,0 50,22 Z"
-      fill="#1A1A1A"
-    />
-    <path
-      d="M 45,2 55,2 58,10 65,12 70,18 75,25 78,32 80,40 78,48 75,55 70,62 65,68 58,70 55,78 45,78 42,70 35,68 30,62 25,55 22,48 20,40 22,32 25,25 30,18 35,12 42,10 Z"
-      fill="url(#cyanGradient)"
-      stroke="#0A0A0A"
-      stroke-width="1.5"
-      style="filter:url(#cyberGlow)"
-    />
-    <circle cx="50" cy="50" r="18" fill="#0A0A0A" />
-    <circle cx="50" cy="50" r="10" fill="url(#cyanGradient)" style="filter:url(#cyberGlow)" />
-    <circle cx="50" cy="50" r="6" fill="#00FFFF" opacity="0.8" />
+  <g style="filter:url(#dropshadow)">
+    <!-- Shield Background -->
+    <path d="M 50,10 L 75,18 L 85,35 L 85,60 L 75,85 L 50,92 L 25,85 L 15,60 L 15,35 L 25,18 Z" 
+          fill="url(#blueGradient)" stroke="#FFFFFF" stroke-width="2" style="filter:url(#blueGlow)"/>
+    
+    <!-- Inner Shield -->
+    <path d="M 50,20 L 68,26 L 75,38 L 75,58 L 68,78 L 50,85 L 32,78 L 25,58 L 25,38 L 32,26 Z" 
+          fill="#000000" stroke="#FFFFFF" stroke-width="1" opacity="0.9"/>
+    
+    <!-- Circuit Pattern Overlay -->
+    <path d="M 50,20 L 68,26 L 75,38 L 75,58 L 68,78 L 50,85 L 32,78 L 25,58 L 25,38 L 32,26 Z" 
+          fill="url(#circuitPattern)" opacity="0.4"/>
+    
+    <!-- Stylized "TA" Monogram -->
+    <g transform="translate(50,52.5)">
+      <!-- T -->
+      <path d="M -18,-15 L -18,5 M -25,-15 L -11,-15" 
+            stroke="url(#redGradient)" stroke-width="3" stroke-linecap="round" style="filter:url(#redGlow)"/>
+      <!-- A -->
+      <path d="M -5,-15 L -5,5 M -5,-15 L 5,-15 L 5,5 M -5,-5 L 5,-5" 
+            stroke="url(#redGradient)" stroke-width="3" stroke-linecap="round" style="filter:url(#redGlow)"/>
+      <!-- Connecting Circuit Line -->
+      <path d="M 8,5 L 15,5 L 15,-5 L 25,-5" 
+            stroke="url(#redGradient)" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+      <circle cx="25" cy="-5" r="2" fill="url(#redGradient)" style="filter:url(#redGlow)"/>
+    </g>
+    
+    <!-- Circuit Nodes -->
+    <circle cx="30" cy="30" r="2" fill="#DC143C" opacity="0.7"/>
+    <circle cx="70" cy="30" r="2" fill="#DC143C" opacity="0.7"/>
+    <circle cx="30" cy="70" r="2" fill="#DC143C" opacity="0.7"/>
+    <circle cx="70" cy="70" r="2" fill="#DC143C" opacity="0.7"/>
+    
+    <!-- Circuit Lines -->
+    <path d="M 30,30 L 35,35 L 35,40 L 30,45" stroke="#DC143C" stroke-width="1" fill="none" opacity="0.5"/>
+    <path d="M 70,30 L 65,35 L 65,40 L 70,45" stroke="#DC143C" stroke-width="1" fill="none" opacity="0.5"/>
   </g>
 </svg>
 `;
-export const APP_LOGO_BASE64 = `data:image/svg+xml;base64,${btoa(gearSvg)}`;
+export const APP_LOGO_BASE64 = `data:image/svg+xml;base64,${btoa(transformArmyLogoSvg)}`;
 
 
 export const ROLES_BY_TEAM: { [key in Team]: (RedTeamRole | BlueTeamRole | SystemTeamRole)[] } = {
