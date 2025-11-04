@@ -12,6 +12,9 @@ import MissionRoster from './components/MissionRoster';
 import MissionLog from './components/MissionLog';
 import EditAgentModal from './components/EditAgentModal';
 import ToolboxManager from './components/ToolboxManager';
+import OrchestratorChatbox from './components/OrchestratorChatbox';
+import { getOrchestratorService } from './services/orchestratorService';
+import { getSlackIntegration } from './services/slackIntegration';
 
 
 export interface MissionLogEntry {
@@ -29,7 +32,11 @@ interface MissionSnapshot {
 
 const LOCAL_STORAGE_KEY = 'transform_army_ai_snapshot_v3_manifest';
 
-const App: React.FC = () => {
+interface AppProps {
+  onNavigate?: (page: 'forge' | 'mission-control') => void;
+}
+
+const App: React.FC<AppProps> = ({ onNavigate }) => {
   // Agent Forge State
   const [selectedTeam, setSelectedTeam] = useState<Team>(Team.System);
   const [availableRoles, setAvailableRoles] = useState<AgentRole[]>(ROLES_BY_TEAM[Team.System]);
@@ -55,6 +62,11 @@ const App: React.FC = () => {
   const [isToolManagerOpen, setIsToolManagerOpen] = useState(false);
   const importFileInputRef = useRef<HTMLInputElement>(null);
 
+  // Orchestrator Communication State
+  const [isChatboxOpen, setIsChatboxOpen] = useState(false);
+  const [orchestratorConnectionStatus, setOrchestratorConnectionStatus] = useState<'connected' | 'connecting' | 'disconnected'>('disconnected');
+  const orchestratorServiceRef = useRef(getOrchestratorService());
+
 
   useEffect(() => {
     try {
@@ -72,6 +84,22 @@ const App: React.FC = () => {
       console.error("Failed to load mission snapshot from localStorage", e);
       addLogEntry("System Error", "Could not load mission state from previous session.");
     }
+
+    // Initialize Orchestrator connection
+    const orchestrator = orchestratorServiceRef.current;
+    const unsubscribe = orchestrator.onConnectionStatusChange((status) => {
+      setOrchestratorConnectionStatus(status);
+    });
+
+    // Attempt connection on mount
+    orchestrator.connect().catch(err => {
+      console.warn('⚠️ Failed to connect to Orchestrator:', err);
+      addLogEntry('System', 'Orchestrator connection unavailable. Chat features disabled.');
+    });
+
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
@@ -119,6 +147,30 @@ const App: React.FC = () => {
       content,
       data
     }]);
+  };
+
+  const handleSendOrchestratorMessage = async (message: string) => {
+    try {
+      const orchestrator = orchestratorServiceRef.current;
+      const response = await orchestrator.sendTextCommand(message);
+      
+      addLogEntry('Orchestrator', response);
+
+      // Notify via Slack if configured
+      const slack = getSlackIntegration();
+      if (slack) {
+        await slack?.notifyMissionUpdate(
+          process.env.REACT_APP_SLACK_CHANNEL_ID || 'C0123456789',
+          'interactive-command',
+          'started',
+          `Command: ${message}`
+        );
+      }
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Unknown error';
+      addLogEntry('System Error', `Orchestrator command failed: ${errorMsg}`);
+      throw err;
+    }
   };
 
   const handleGenerateAgent = async (
@@ -441,6 +493,41 @@ const App: React.FC = () => {
             onClose={() => setIsToolManagerOpen(false)}
             onSave={setCustomTools}
           />
+      )}
+
+      {/* Orchestrator Chatbox */}
+      <OrchestratorChatbox
+        isOpen={isChatboxOpen}
+        onClose={() => setIsChatboxOpen(false)}
+        onSendMessage={handleSendOrchestratorMessage}
+        connectionStatus={orchestratorConnectionStatus}
+      />
+
+      {/* Floating Chatbox Toggle Button */}
+      <button
+        onClick={() => setIsChatboxOpen(!isChatboxOpen)}
+        className="fixed bottom-6 right-4 w-16 h-16 bg-gradient-to-br from-[--color-accent-red] to-[--color-accent-blue] text-white rounded-full shadow-2xl hover:shadow-3xl hover:scale-110 transition-all flex items-center justify-center z-40"
+        title={isChatboxOpen ? 'Close Orchestrator Chat' : 'Open Orchestrator Chat'}
+      >
+        <span className="text-2xl">💬</span>
+      </button>
+
+      {/* Mission Control Navigation Button */}
+      {missionAgents.length > 0 && onNavigate && (
+        <button
+          onClick={() => onNavigate('mission-control')}
+          className="fixed bottom-6 right-24 w-16 h-16 bg-gradient-to-br from-[--color-accent-blue] to-[--color-accent-red] text-white rounded-full shadow-2xl hover:shadow-3xl hover:scale-110 transition-all flex items-center justify-center z-40 font-bold text-xl hover:animate-pulse"
+          title="Open Mission Control"
+        >
+          🎛
+        </button>
+      )}
+
+      {/* Connection status indicator */}
+      {orchestratorConnectionStatus !== 'disconnected' && (
+        <div className="fixed bottom-24 right-6 text-xs text-[--color-text-secondary] bg-[--color-bg-secondary] px-2 py-1 rounded">
+          Orchestrator: {orchestratorConnectionStatus}
+        </div>
       )}
 
       <footer className="text-center p-4 text-xs text-[--color-text-muted] border-t border-[--color-border-primary]">

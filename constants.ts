@@ -109,7 +109,21 @@ export const ROLES_BY_TEAM: { [key in Team]: (RedTeamRole | BlueTeamRole | Syste
 // Base tools available to all tactical agents
 const BASE_TACTICAL_TOOLS = ['request_human_input', 'send_message', 'generate_and_execute_script', 'read_file', 'write_file'];
 
+// System-level tools available to Orchestrator and System agents
+export const SYSTEM_TOOLS = [
+  'duckduckgo_search',      // Internet search via DuckDuckGo
+  'github_query',           // GitHub repository search and code lookup
+  'github_clone',           // Clone GitHub repositories
+  'request_human_input',
+  'send_message',
+  'generate_and_execute_script',
+];
+
 export const AVAILABLE_TOOLS_BY_ROLE: { [key in AgentRole]?: string[] } = {
+    [SystemTeamRole.Orchestrator]: [...SYSTEM_TOOLS],
+    [SystemTeamRole.RedTeamArmory]: [...SYSTEM_TOOLS],
+    [SystemTeamRole.BlueTeamGarrison]: [...SYSTEM_TOOLS],
+    [SystemTeamRole.IntelligenceAnalyst]: [...SYSTEM_TOOLS],
     [RedTeamRole.Reconnaissance]: ['nmap_scan', 'theharvester_search', ...BASE_TACTICAL_TOOLS],
     [RedTeamRole.VulnerabilityScanning]: ['sqlmap_scan', 'nikto_scan', ...BASE_TACTICAL_TOOLS],
     [RedTeamRole.PayloadDelivery]: [...BASE_TACTICAL_TOOLS],
