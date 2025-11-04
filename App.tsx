@@ -354,10 +354,8 @@ const App: React.FC<AppProps> = ({ onNavigate }) => {
       addLogEntry("System", `Loading mission template: ${template.name}...`);
       setIsLoading(true);
       
-      // Initialize mission BEFORE adding agents (so addAgent works)
-      if (!mission) {
-        startMission(template.name, `Loaded from template: ${template.name}`);
-      }
+      // Always create a fresh mission when loading a new template (clear old one first)
+      startMission(template.name, `Loaded from template: ${template.name}`);
       
       const newAgents: AgentProfile[] = [];
       try {
