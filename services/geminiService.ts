@@ -151,16 +151,59 @@ function parseJSONSafely(jsonString: string): any {
     // (these would be truly malformed JSON at this point)
     sanitized = sanitized.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '');
     
-    // Try parsing after all sanitization
+    // STEP 4: Try a direct parse after basic sanitization
     try {
-      return JSON.parse(sanitized);
+      const parsed = JSON.parse(sanitized);
+      console.log('✅ [JSON PARSE] Successfully parsed after sanitization');
+      return parsed;
     } catch (secondError) {
-      console.error('❌ [JSON PARSE] All repair attempts failed');
-      console.error('  - Original error:', error instanceof Error ? error.message : String(error));
+      console.warn('⚠️ [JSON PARSE] Sanitization parse failed, trying aggressive repair...');
       console.error('  - Second error:', secondError instanceof Error ? secondError.message : String(secondError));
-      console.error('  - Problematic JSON (first 500 chars):', sanitized.substring(0, 500));
-      console.error('  - Problematic JSON (last 500 chars):', sanitized.substring(Math.max(0, sanitized.length - 500)));
-      throw new Error(`Failed to parse JSON response from LLM. Error: ${error instanceof Error ? error.message : String(error)}. The response may contain invalid control characters, JavaScript comments, or malformed JSON.`);
+      
+      // STEP 5: Aggressive repair - fix common JSON issues
+      try {
+        let aggressive = sanitized;
+        
+        // Fix unescaped quotes in strings (this is tricky, best effort)
+        // Replace literal newlines within quoted strings that weren't caught
+        aggressive = aggressive.replace(/("\w+":\s*")([^"]*?)"/g, (match, prefix, content) => {
+          // Escape any unescaped newlines in the content
+          const fixed = content.replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t');
+          return prefix + fixed + '"';
+        });
+        
+        // Remove any non-printable characters that might be lingering
+        aggressive = aggressive.replace(/[^\x20-\x7E\n\r\t]/g, '');
+        
+        // Try to parse the aggressively cleaned version
+        const parsed = JSON.parse(aggressive);
+        console.log('✅ [JSON PARSE] Successfully parsed after aggressive repair');
+        return parsed;
+      } catch (thirdError) {
+        console.error('❌ [JSON PARSE] All repair attempts failed');
+        console.error('  - Original error:', error instanceof Error ? error.message : String(error));
+        console.error('  - Second error:', secondError instanceof Error ? secondError.message : String(secondError));
+        console.error('  - Third error:', thirdError instanceof Error ? thirdError.message : String(thirdError));
+        console.error('  - Problematic JSON (first 500 chars):', sanitized.substring(0, 500));
+        console.error('  - Problematic JSON (last 500 chars):', sanitized.substring(Math.max(0, sanitized.length - 500)));
+        
+        // As a last resort, try to extract just the JSON object using a more lenient approach
+        try {
+          // Find the outermost braces and extract everything between them
+          const firstBrace = sanitized.indexOf('{');
+          const lastBrace = sanitized.lastIndexOf('}');
+          if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+            const extracted = sanitized.substring(firstBrace, lastBrace + 1);
+            const parsed = JSON.parse(extracted);
+            console.log('✅ [JSON PARSE] Successfully parsed after extraction');
+            return parsed;
+          }
+        } catch (fourthError) {
+          console.error('  - Fourth error:', fourthError instanceof Error ? fourthError.message : String(fourthError));
+        }
+        
+        throw new Error(`Failed to parse JSON response from LLM after multiple repair attempts. Original error: ${error instanceof Error ? error.message : String(error)}. The LLM may have returned malformed JSON.`);
+      }
     }
   }
 }

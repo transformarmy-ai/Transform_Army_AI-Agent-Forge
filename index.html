@@ -184,8 +184,77 @@
 <link rel="stylesheet" href="/index.css">
 </head>
   <body>
+    <!-- Matrix Digital Rain Background -->
+    <canvas id="matrix-rain" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; opacity: 0.15;"></canvas>
+    
     <div id="root"></div>
+    
     <script>
+      // Matrix Digital Rain Effect
+      const canvas = document.getElementById('matrix-rain');
+      const ctx = canvas.getContext('2d');
+      
+      // Set canvas size
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      
+      // Binary characters (0s and 1s)
+      const binary = '01';
+      const fontSize = 14;
+      const columns = canvas.width / fontSize;
+      
+      // Array to track drop position for each column
+      const drops = [];
+      for (let i = 0; i < columns; i++) {
+        drops[i] = Math.random() * -100; // Start at random positions
+      }
+      
+      // Color scheme for the rain (red, white, blue accents)
+      const colors = [
+        'rgba(220, 20, 60, 0.8)',   // Red
+        'rgba(255, 255, 255, 0.8)',  // White
+        'rgba(0, 120, 255, 0.8)',    // Blue
+        'rgba(220, 20, 60, 0.6)',    // Red dimmer
+        'rgba(255, 255, 255, 0.6)',  // White dimmer
+      ];
+      
+      function draw() {
+        // Create fade effect with semi-transparent black
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.font = fontSize + 'px monospace';
+        
+        // Loop through drops
+        for (let i = 0; i < drops.length; i++) {
+          // Pick random binary character
+          const text = binary[Math.floor(Math.random() * binary.length)];
+          
+          // Pick a color from our patriotic theme
+          ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
+          
+          // Draw the character
+          ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+          
+          // Reset drop to top randomly after it crosses screen
+          if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+            drops[i] = 0;
+          }
+          
+          // Increment Y coordinate
+          drops[i]++;
+        }
+      }
+      
+      // Animation loop
+      setInterval(draw, 50);
+      
+      // Resize canvas on window resize
+      window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      });
+      
       // Polyfill for crypto.randomUUID() for browsers that don't support it
       if (!crypto.randomUUID) {
         crypto.randomUUID = function randomUUID() {
