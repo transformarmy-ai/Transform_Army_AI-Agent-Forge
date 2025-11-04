@@ -16,6 +16,8 @@ export enum LLMProvider {
   OpenAI = 'OpenAI',
   OpenRouter = 'OpenRouter',
   Anthropic = 'Anthropic',
+  Ollama = 'Ollama (Local)',
+  LMStudio = 'LM Studio (Local)',
 }
 
 export enum RedTeamRole {

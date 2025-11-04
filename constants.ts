@@ -3,7 +3,13 @@ import { Team, Language, RedTeamRole, BlueTeamRole, LLMProvider, SystemTeamRole,
 
 export const TEAMS = [Team.System, Team.Red, Team.Blue];
 export const LANGUAGES = [Language.Python, Language.JavaScript, Language.Go, Language.Rust];
-export const LLM_PROVIDERS = [LLMProvider.OpenAI, LLMProvider.OpenRouter, LLMProvider.Anthropic];
+export const LLM_PROVIDERS = [
+  LLMProvider.OpenAI, 
+  LLMProvider.OpenRouter, 
+  LLMProvider.Anthropic,
+  LLMProvider.Ollama,
+  LLMProvider.LMStudio
+];
 
 // Transform Army AI Logo - Hacker Shield motif in site colors
 const transformArmyLogoSvg = `

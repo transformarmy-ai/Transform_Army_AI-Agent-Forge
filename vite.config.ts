@@ -13,7 +13,9 @@ export default defineConfig(({ mode }) => {
       define: {
         'process.env.OPENAI_API_KEY': JSON.stringify(env.OPENAI_API_KEY || ''),
         'process.env.OPENROUTER_API_KEY': JSON.stringify(env.OPENROUTER_API_KEY || ''),
-        'process.env.ANTHROPIC_API_KEY': JSON.stringify(env.ANTHROPIC_API_KEY || '')
+        'process.env.ANTHROPIC_API_KEY': JSON.stringify(env.ANTHROPIC_API_KEY || ''),
+        'process.env.OLLAMA_BASE_URL': JSON.stringify(env.OLLAMA_BASE_URL || 'http://localhost:11434'),
+        'process.env.LMSTUDIO_BASE_URL': JSON.stringify(env.LMSTUDIO_BASE_URL || 'http://localhost:1234')
       },
       resolve: {
         alias: {
