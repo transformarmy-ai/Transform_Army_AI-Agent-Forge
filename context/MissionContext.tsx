@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { AgentProfile, Team, AgentRole, Language, LLMProvider } from '../types';
 
 export interface MissionLogEntry {
@@ -44,6 +44,44 @@ const MissionContext = createContext<MissionContextType | undefined>(undefined);
 
 export const MissionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [mission, setMission] = useState<Mission | null>(null);
+  const STORAGE_KEY = 'transform-army.mission.v1';
+
+  // Load from localStorage on mount
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const parsed: Mission = JSON.parse(raw);
+      // Reset transient connection status on load
+      const restored: Mission = {
+        ...parsed,
+        orchestratorConnectionStatus: 'disconnected',
+      };
+      setMission(restored);
+    } catch (err) {
+      // Corrupt storage; clear it
+      try { localStorage.removeItem(STORAGE_KEY); } catch {}
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Persist to localStorage whenever mission changes
+  useEffect(() => {
+    try {
+      if (!mission) {
+        localStorage.removeItem(STORAGE_KEY);
+        return;
+      }
+      const toStore: Mission = {
+        ...mission,
+        // Do not persist 'connected' to avoid stale UI; set to disconnected on load
+        orchestratorConnectionStatus: mission.orchestratorConnectionStatus,
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(toStore));
+    } catch {
+      // Ignore quota or serialization errors
+    }
+  }, [mission]);
 
   const addAgent = useCallback((agent: AgentProfile) => {
     setMission(prev => {

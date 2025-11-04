@@ -26,6 +26,7 @@ export class OrchestratorService {
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private reconnectDelay = 1000;
+  private hasLoggedMaxReconnectAttempts = false;
 
   constructor(baseUrl: string = 'http://localhost:3000', wsUrl: string = 'ws://localhost:3000') {
     this.baseUrl = baseUrl;
@@ -53,6 +54,7 @@ export class OrchestratorService {
         this.ws.onopen = () => {
           clearTimeout(timeout);
           this.reconnectAttempts = 0;
+          this.hasLoggedMaxReconnectAttempts = false;
           this.setConnectionStatus('connected');
           console.log('✅ Connected to Orchestrator');
           resolve();
@@ -69,7 +71,10 @@ export class OrchestratorService {
 
         this.ws.onerror = (error) => {
           clearTimeout(timeout);
-          console.error('WebSocket error:', error);
+          // Only log connection errors in development, not for expected timeouts
+          if (process.env.NODE_ENV === 'development') {
+            console.debug('WebSocket error (expected if no backend running):', error);
+          }
           this.setConnectionStatus('disconnected');
           reject(error);
         };
@@ -80,10 +85,10 @@ export class OrchestratorService {
         };
       });
     } catch (error) {
-      console.error('Failed to connect to Orchestrator:', error);
+      // Silently fail - connection errors are expected when backend is not running
+      // Only log once per session when we hit max retries
       this.setConnectionStatus('disconnected');
       this.attemptReconnect();
-      throw error;
     }
   }
 
@@ -243,10 +248,19 @@ export class OrchestratorService {
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       this.reconnectAttempts++;
       const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
-      console.log(`⏳ Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
-      setTimeout(() => this.connect().catch(err => console.error('Reconnect failed:', err)), delay);
+      // Only log in development mode
+      if (process.env.NODE_ENV === 'development') {
+        console.debug(`⏳ Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
+      }
+      setTimeout(() => this.connect().catch(() => {
+        // Silently catch - expected when backend not running
+      }), delay);
     } else {
-      console.error('❌ Max reconnection attempts reached');
+      // Only log this once per session to avoid spam
+      if (!this.hasLoggedMaxReconnectAttempts) {
+        this.hasLoggedMaxReconnectAttempts = true;
+        console.info('ℹ️ Orchestrator backend not found. Mission Control will work in read-only mode without live command dispatch.');
+      }
     }
   }
 }
