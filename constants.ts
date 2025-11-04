@@ -5,82 +5,74 @@ export const TEAMS = [Team.System, Team.Red, Team.Blue];
 export const LANGUAGES = [Language.Python, Language.JavaScript, Language.Go, Language.Rust];
 export const LLM_PROVIDERS = [LLMProvider.OpenAI, LLMProvider.OpenRouter, LLMProvider.Anthropic];
 
-// Transform Army AI Logo - Hacker/Patriotic Theme
-// Shield with circuit board pattern and stylized "TA" monogram
+// Transform Army AI Logo - Hacker Shield motif in site colors
 const transformArmyLogoSvg = `
 <svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <filter id="dropshadow" height="130%">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
-      <feOffset dx="2" dy="2" result="offsetblur"/>
-      <feMerge>
-        <feMergeNode/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-    <filter id="redGlow">
-      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
-      <feMerge>
-        <feMergeNode in="coloredBlur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-    <filter id="blueGlow">
-      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-      <feMerge>
-        <feMergeNode in="coloredBlur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-    <linearGradient id="redGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#DC143C;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#FF1744;stop-opacity:1" />
+    <linearGradient id="shieldOuter" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#111317" />
+      <stop offset="100%" stop-color="#0A0A0A" />
     </linearGradient>
-    <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#00308F;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#0052CC;stop-opacity:1" />
+    <linearGradient id="shieldCore" x1="30%" y1="0%" x2="70%" y2="100%">
+      <stop offset="0%" stop-color="#00308F" />
+      <stop offset="100%" stop-color="#DC143C" />
     </linearGradient>
-    <pattern id="circuitPattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-      <path d="M 0,10 L 10,10 L 10,0 M 10,10 L 20,10 M 10,10 L 10,20" stroke="#DC143C" stroke-width="0.5" fill="none" opacity="0.3"/>
-      <circle cx="10" cy="10" r="1" fill="#DC143C" opacity="0.5"/>
+    <radialGradient id="shieldGlow" cx="50%" cy="40%" r="65%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.25" />
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="glyphGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="#FF3055" />
+    </linearGradient>
+    <pattern id="gridPattern" patternUnits="userSpaceOnUse" width="10" height="10">
+      <path d="M0 5H10 M5 0V10" stroke="#DC143C" stroke-width="0.4" opacity="0.25" />
     </pattern>
+    <filter id="glowRed" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+      <feMerge>
+        <feMergeNode in="coloredBlur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
   </defs>
-  <g style="filter:url(#dropshadow)">
-    <!-- Shield Background -->
-    <path d="M 50,10 L 75,18 L 85,35 L 85,60 L 75,85 L 50,92 L 25,85 L 15,60 L 15,35 L 25,18 Z" 
-          fill="url(#blueGradient)" stroke="#FFFFFF" stroke-width="2" style="filter:url(#blueGlow)"/>
-    
-    <!-- Inner Shield -->
-    <path d="M 50,20 L 68,26 L 75,38 L 75,58 L 68,78 L 50,85 L 32,78 L 25,58 L 25,38 L 32,26 Z" 
-          fill="#000000" stroke="#FFFFFF" stroke-width="1" opacity="0.9"/>
-    
-    <!-- Circuit Pattern Overlay -->
-    <path d="M 50,20 L 68,26 L 75,38 L 75,58 L 68,78 L 50,85 L 32,78 L 25,58 L 25,38 L 32,26 Z" 
-          fill="url(#circuitPattern)" opacity="0.4"/>
-    
-    <!-- Stylized "TA" Monogram -->
-    <g transform="translate(50,52.5)">
-      <!-- T -->
-      <path d="M -18,-15 L -18,5 M -25,-15 L -11,-15" 
-            stroke="url(#redGradient)" stroke-width="3" stroke-linecap="round" style="filter:url(#redGlow)"/>
-      <!-- A -->
-      <path d="M -5,-15 L -5,5 M -5,-15 L 5,-15 L 5,5 M -5,-5 L 5,-5" 
-            stroke="url(#redGradient)" stroke-width="3" stroke-linecap="round" style="filter:url(#redGlow)"/>
-      <!-- Connecting Circuit Line -->
-      <path d="M 8,5 L 15,5 L 15,-5 L 25,-5" 
-            stroke="url(#redGradient)" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
-      <circle cx="25" cy="-5" r="2" fill="url(#redGradient)" style="filter:url(#redGlow)"/>
+
+  <g>
+    <!-- Outer shield silhouette -->
+    <path d="M50 8 L80 18 L88 35 L88 60 L80 84 L50 94 L20 84 L12 60 L12 35 L20 18 Z"
+          fill="url(#shieldOuter)" stroke="#FFFFFF" stroke-width="2.5" />
+
+    <!-- Inner shield core -->
+    <path d="M50 18 L70 25 L78 38 L78 57 L70 78 L50 86 L30 78 L22 57 L22 38 L30 25 Z"
+          fill="url(#shieldCore)" stroke="#FFFFFF" stroke-width="1.5" />
+
+    <!-- Subtle glow overlay -->
+    <path d="M50 18 L70 25 L78 38 L78 57 L70 78 L50 86 L30 78 L22 57 L22 38 L30 25 Z"
+          fill="url(#shieldGlow)" opacity="0.35" />
+
+    <!-- Grid overlay -->
+    <path d="M50 18 L70 25 L78 38 L78 57 L70 78 L50 86 L30 78 L22 57 L22 38 L30 25 Z"
+          fill="url(#gridPattern)" opacity="0.6" />
+
+    <!-- Central circuit spine -->
+    <path d="M50 25 L50 78" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity="0.6" />
+    <circle cx="50" cy="32" r="2.7" fill="#FFFFFF" opacity="0.4" />
+    <circle cx="50" cy="50" r="3" fill="#FFFFFF" opacity="0.6" />
+    <circle cx="50" cy="68" r="2.4" fill="#FFFFFF" opacity="0.4" />
+
+    <!-- Angular hacker glyph (stylised T / A) -->
+    <g filter="url(#glowRed)">
+      <path d="M32 42 L68 42" stroke="url(#glyphGradient)" stroke-width="4" stroke-linecap="round" />
+      <path d="M32 42 L45 68" stroke="url(#glyphGradient)" stroke-width="4" stroke-linecap="round" />
+      <path d="M68 42 L55 68" stroke="url(#glyphGradient)" stroke-width="4" stroke-linecap="round" />
+      <path d="M40 57 L60 57" stroke="url(#glyphGradient)" stroke-width="3" stroke-linecap="round" />
     </g>
-    
-    <!-- Circuit Nodes -->
-    <circle cx="30" cy="30" r="2" fill="#DC143C" opacity="0.7"/>
-    <circle cx="70" cy="30" r="2" fill="#DC143C" opacity="0.7"/>
-    <circle cx="30" cy="70" r="2" fill="#DC143C" opacity="0.7"/>
-    <circle cx="70" cy="70" r="2" fill="#DC143C" opacity="0.7"/>
-    
-    <!-- Circuit Lines -->
-    <path d="M 30,30 L 35,35 L 35,40 L 30,45" stroke="#DC143C" stroke-width="1" fill="none" opacity="0.5"/>
-    <path d="M 70,30 L 65,35 L 65,40 L 70,45" stroke="#DC143C" stroke-width="1" fill="none" opacity="0.5"/>
+
+    <!-- Circuit branches -->
+    <path d="M28 48 L22 52 L22 60" stroke="#FF3055" stroke-width="1.2" opacity="0.5" />
+    <path d="M72 48 L78 52 L78 60" stroke="#FF3055" stroke-width="1.2" opacity="0.5" />
+    <circle cx="22" cy="60" r="1.8" fill="#FF3055" opacity="0.6" />
+    <circle cx="78" cy="60" r="1.8" fill="#FF3055" opacity="0.6" />
   </g>
 </svg>
 `;

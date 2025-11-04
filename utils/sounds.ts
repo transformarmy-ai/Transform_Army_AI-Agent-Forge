@@ -1,28 +1,66 @@
 // Futuristic sound effects using Web Audio API
 class SoundManager {
   private audioContext: AudioContext | null = null;
-  private enabled: boolean = true;
+  private enabled = true;
+  private hasUserInteracted = false;
 
   constructor() {
-    // Initialize AudioContext on first user interaction
     if (typeof window !== 'undefined') {
-      this.audioContext = null; // Lazy initialization
+      const unlockAudio = async () => {
+        this.hasUserInteracted = true;
+        try {
+          const ctx = this.getOrCreateContext();
+          if (ctx.state === 'suspended') {
+            await ctx.resume();
+          }
+        } catch (error) {
+          console.debug('Audio context resume blocked', error);
+        }
+      };
+
+      const unlockEvents: Array<keyof WindowEventMap> = ['pointerdown', 'keydown', 'touchstart'];
+      unlockEvents.forEach(event => {
+        window.addEventListener(event, unlockAudio, { once: true, passive: true });
+      });
     }
   }
 
-  private getAudioContext(): AudioContext {
-    if (!this.audioContext) {
-      this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+  private getOrCreateContext(): AudioContext {
+    if (!this.audioContext && typeof window !== 'undefined') {
+      const AudioCtx = (window.AudioContext || (window as any).webkitAudioContext);
+      this.audioContext = new AudioCtx();
     }
-    return this.audioContext;
+    return this.audioContext as AudioContext;
   }
 
-  // Generate a futuristic beep sound
-  private playBeep(frequency: number, duration: number, type: OscillatorType = 'sine'): void {
+  private async withContext(play: (ctx: AudioContext) => void): Promise<void> {
     if (!this.enabled) return;
-    
     try {
-      const ctx = this.getAudioContext();
+      const ctx = this.getOrCreateContext();
+      if (!ctx) return;
+
+      // Defer playback until after a user interaction unlocks audio
+      if (!this.hasUserInteracted) {
+        return;
+      }
+
+      if (ctx.state === 'suspended') {
+        try {
+          await ctx.resume();
+        } catch (error) {
+          console.debug('Audio context resume failed', error);
+          return;
+        }
+      }
+
+      play(ctx);
+    } catch (error) {
+      console.debug('Audio playback failed', error);
+    }
+  }
+
+  private async playBeep(frequency: number, duration: number, type: OscillatorType = 'sine'): Promise<void> {
+    await this.withContext((ctx) => {
       const oscillator = ctx.createOscillator();
       const gainNode = ctx.createGain();
 
@@ -32,33 +70,25 @@ class SoundManager {
       oscillator.frequency.value = frequency;
       oscillator.type = type;
 
-      gainNode.gain.setValueAtTime(0.1, ctx.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
+      const start = ctx.currentTime;
+      gainNode.gain.setValueAtTime(0.12, start);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, start + duration);
 
-      oscillator.start(ctx.currentTime);
-      oscillator.stop(ctx.currentTime + duration);
-    } catch (error) {
-      // Silently fail if audio context is not available
-      console.debug('Audio context not available');
-    }
+      oscillator.start(start);
+      oscillator.stop(start + duration);
+    });
   }
 
-  // Hover sound - high pitch beep
-  playHover(): void {
-    this.playBeep(800, 0.1, 'sine');
+  async playHover(): Promise<void> {
+    await this.playBeep(800, 0.1, 'sine');
   }
 
-  // Click sound - medium pitch beep
-  playClick(): void {
-    this.playBeep(600, 0.15, 'square');
+  async playClick(): Promise<void> {
+    await this.playBeep(600, 0.15, 'square');
   }
 
-  // Action sound - dual tone
-  playAction(): void {
-    if (!this.enabled) return;
-    
-    try {
-      const ctx = this.getAudioContext();
+  async playAction(): Promise<void> {
+    await this.withContext((ctx) => {
       const oscillator1 = ctx.createOscillator();
       const oscillator2 = ctx.createOscillator();
       const gainNode = ctx.createGain();
@@ -67,73 +97,62 @@ class SoundManager {
       oscillator2.connect(gainNode);
       gainNode.connect(ctx.destination);
 
-      oscillator1.frequency.value = 400;
-      oscillator2.frequency.value = 600;
+      oscillator1.frequency.value = 420;
+      oscillator2.frequency.value = 660;
       oscillator1.type = 'sine';
-      oscillator2.type = 'sine';
+      oscillator2.type = 'triangle';
 
-      gainNode.gain.setValueAtTime(0.15, ctx.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+      const start = ctx.currentTime;
+      gainNode.gain.setValueAtTime(0.15, start);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, start + 0.22);
 
-      oscillator1.start(ctx.currentTime);
-      oscillator2.start(ctx.currentTime);
-      oscillator1.stop(ctx.currentTime + 0.2);
-      oscillator2.stop(ctx.currentTime + 0.2);
-    } catch (error) {
-      console.debug('Audio context not available');
-    }
+      oscillator1.start(start);
+      oscillator2.start(start + 0.02);
+      oscillator1.stop(start + 0.22);
+      oscillator2.stop(start + 0.22);
+    });
   }
 
-  // Success sound - ascending tone
-  playSuccess(): void {
-    if (!this.enabled) return;
-    
-    try {
-      const ctx = this.getAudioContext();
+  async playSuccess(): Promise<void> {
+    await this.withContext((ctx) => {
       const oscillator = ctx.createOscillator();
       const gainNode = ctx.createGain();
 
       oscillator.connect(gainNode);
       gainNode.connect(ctx.destination);
 
-      oscillator.frequency.setValueAtTime(400, ctx.currentTime);
-      oscillator.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.3);
+      const start = ctx.currentTime;
+      oscillator.frequency.setValueAtTime(360, start);
+      oscillator.frequency.exponentialRampToValueAtTime(880, start + 0.35);
       oscillator.type = 'sine';
 
-      gainNode.gain.setValueAtTime(0.2, ctx.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+      gainNode.gain.setValueAtTime(0.18, start);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, start + 0.35);
 
-      oscillator.start(ctx.currentTime);
-      oscillator.stop(ctx.currentTime + 0.3);
-    } catch (error) {
-      console.debug('Audio context not available');
-    }
+      oscillator.start(start);
+      oscillator.stop(start + 0.35);
+    });
   }
 
-  // Error sound - low descending tone
-  playError(): void {
-    if (!this.enabled) return;
-    
-    try {
-      const ctx = this.getAudioContext();
+  async playError(): Promise<void> {
+    await this.withContext((ctx) => {
       const oscillator = ctx.createOscillator();
       const gainNode = ctx.createGain();
 
       oscillator.connect(gainNode);
       gainNode.connect(ctx.destination);
 
-      oscillator.frequency.setValueAtTime(300, ctx.currentTime);
-      oscillator.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.4);
+      const start = ctx.currentTime;
+      oscillator.frequency.setValueAtTime(320, start);
+      oscillator.frequency.exponentialRampToValueAtTime(140, start + 0.45);
       oscillator.type = 'sawtooth';
 
-      gainNode.gain.setValueAtTime(0.2, ctx.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+      gainNode.gain.setValueAtTime(0.18, start);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, start + 0.45);
 
-      oscillator.start(ctx.currentTime);
-      oscillator.stop(ctx.currentTime + 0.4);
-    } catch (error) {
-      console.debug('Audio context not available');
-    }
+      oscillator.start(start);
+      oscillator.stop(start + 0.45);
+    });
   }
 
   setEnabled(enabled: boolean): void {
