@@ -214,7 +214,7 @@ const App: React.FC = () => {
                 members: missionAgents.map(a => ({ role: a.role, agentRef: `${a.manifest.id}.json`})),
                 orchestration: { mode: 'planner-directed', entryAgent: missionAgents.find(a => a.role === SystemTeamRole.Orchestrator)?.manifest.id || missionAgents[0].manifest.id },
                 sharedMemory: { enabled: true, binding: 'indexes/exported-shared', provider: 'qdrant' },
-                env: { required: [...new Set(missionAgents.flatMap(a => a.manifest.env.required))], optional: [] }
+                env: { required: Array.from(new Set(missionAgents.flatMap(a => a.manifest.env.required))), optional: [] }
             };
             zip.file('agent-team.v1.json', JSON.stringify(teamManifest, null, 2));
         }

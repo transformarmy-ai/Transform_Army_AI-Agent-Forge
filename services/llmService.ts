@@ -310,16 +310,39 @@ function getProviderConfig(provider: LLMProvider, modelName: string): { apiKey: 
   let apiKey = '';
   switch (provider) {
     case LLMProvider.Gemini:
-      apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY || '';
+      // DIAGNOSTIC LOG: Check both potential API key sources
+      const geminiKey1 = process.env.API_KEY;
+      const geminiKey2 = process.env.GEMINI_API_KEY;
+      console.log('🔍 [DIAGNOSTIC] Gemini API Key Check:');
+      console.log('  - process.env.API_KEY:', geminiKey1 ? 'SET' : 'MISSING');
+      console.log('  - process.env.GEMINI_API_KEY:', geminiKey2 ? 'SET' : 'MISSING');
+      apiKey = geminiKey1 || geminiKey2 || '';
+      console.log('  - Final apiKey:', apiKey ? 'SET' : 'MISSING');
+      console.log('  - Provider selected:', provider);
       break;
     case LLMProvider.OpenAI:
-      apiKey = process.env.OPENAI_API_KEY || '';
+      const openaiKey = process.env.OPENAI_API_KEY;
+      console.log('🔍 [DIAGNOSTIC] OpenAI API Key Check:');
+      console.log('  - process.env.OPENAI_API_KEY:', openaiKey ? 'SET' : 'MISSING');
+      apiKey = openaiKey || '';
+      console.log('  - Final apiKey:', apiKey ? 'SET' : 'MISSING');
+      console.log('  - Provider selected:', provider);
       break;
     case LLMProvider.OpenRouter:
-      apiKey = process.env.OPENROUTER_API_KEY || '';
+      const openrouterKey = process.env.OPENROUTER_API_KEY;
+      console.log('🔍 [DIAGNOSTIC] OpenRouter API Key Check:');
+      console.log('  - process.env.OPENROUTER_API_KEY:', openrouterKey ? 'SET' : 'MISSING');
+      apiKey = openrouterKey || '';
+      console.log('  - Final apiKey:', apiKey ? 'SET' : 'MISSING');
+      console.log('  - Provider selected:', provider);
       break;
     case LLMProvider.Anthropic:
-      apiKey = process.env.ANTHROPIC_API_KEY || '';
+      const anthropicKey = process.env.ANTHROPIC_API_KEY;
+      console.log('🔍 [DIAGNOSTIC] Anthropic API Key Check:');
+      console.log('  - process.env.ANTHROPIC_API_KEY:', anthropicKey ? 'SET' : 'MISSING');
+      apiKey = anthropicKey || '';
+      console.log('  - Final apiKey:', apiKey ? 'SET' : 'MISSING');
+      console.log('  - Provider selected:', provider);
       break;
   }
 

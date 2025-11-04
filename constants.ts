@@ -13,10 +13,10 @@ const gearSvg = `
     <filter id="dropshadow" height="130%">
       <feGaussianBlur in="SourceAlpha" stdDeviation="3"/> 
       <feOffset dx="2" dy="2" result="offsetblur"/>
-      <feMerge> 
+      <feMerge>
         <feMergeNode/>
         <feMergeNode in="SourceGraphic"/>
-      </Merge>
+      </feMerge>
     </filter>
   </defs>
   <g transform="rotate(15 50 50)" style="filter:url(#dropshadow)">
