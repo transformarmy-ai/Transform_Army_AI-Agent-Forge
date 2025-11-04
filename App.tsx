@@ -354,6 +354,11 @@ const App: React.FC<AppProps> = ({ onNavigate }) => {
       addLogEntry("System", `Loading mission template: ${template.name}...`);
       setIsLoading(true);
       
+      // Initialize mission BEFORE adding agents (so addAgent works)
+      if (!mission) {
+        startMission(template.name, `Loaded from template: ${template.name}`);
+      }
+      
       const newAgents: AgentProfile[] = [];
       try {
         for (const [index, agentConfig] of template.agents.entries()) {
@@ -376,16 +381,12 @@ const App: React.FC<AppProps> = ({ onNavigate }) => {
             );
             newAgents.push(profile);
             addLogEntry("AgentForge", `(Template) Forged manifest: ${profile.manifest.name}.`);
-            // Add each agent to MissionContext immediately
+            // Add each agent to MissionContext (mission now exists, so this works)
             addAgent(profile);
         }
         setMissionAgents(newAgents);
         if (newAgents.length > 0) {
             setActiveDetailView(newAgents[newAgents.length - 1]);
-            // Initialize mission if not already created
-            if (!mission) {
-              startMission(template.name, `Loaded from template: ${template.name}`);
-            }
         }
         addLogEntry("System", `Mission template "${template.name}" loaded successfully.`);
       } catch(e) {
