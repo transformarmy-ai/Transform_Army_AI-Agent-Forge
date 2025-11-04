@@ -128,7 +128,6 @@ Access URLs:
 
 ### ✅ Multi-Provider LLM Support
 The container includes the full multi-provider LLM system:
-- Gemini (via REST API)
 - OpenAI
 - Anthropic Claude
 - OpenRouter

@@ -168,14 +168,16 @@ This repository now contains comprehensive documentation for migrating Google AI
 
 ## 📊 Provider Comparison Reference
 
-| Feature | Gemini | OpenAI | Anthropic | OpenRouter |
-|---------|--------|--------|-----------|------------|
-| **Structured Outputs** | ✅ Native | ✅ Native | ⚠️ Prompt-based | ✅ Native |
-| **Best Quality** | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | Varies |
-| **Speed** | ⚡⚡⚡ | ⚡⚡ | ⚡⚡ | ⚡⚡⚡ |
-| **Free Tier** | ✅ Yes | ❌ No | ❌ No | ⚠️ Limited |
-| **Cost ($)** | $ | $$$ | $$ | $$ |
-| **Models** | gemini-2.5-pro, gemini-1.5 | gpt-4o, gpt-4 | claude-3.5, claude-3 | Many |
+**Note**: Gemini support has been removed from the current implementation.
+
+| Feature | OpenAI | Anthropic | OpenRouter |
+|---------|--------|-----------|------------|
+| **Structured Outputs** | ✅ Native | ⚠️ Prompt-based | ✅ Native |
+| **Best Quality** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | Varies |
+| **Speed** | ⚡⚡ | ⚡⚡ | ⚡⚡⚡ |
+| **Free Tier** | ❌ No | ❌ No | ⚠️ Limited |
+| **Cost ($)** | $$$ | $$ | $$ |
+| **Models** | gpt-4o, gpt-4, gpt-4-turbo | claude-3.5, claude-3 | Many models available |
 
 ---
 
@@ -184,7 +186,7 @@ This repository now contains comprehensive documentation for migrating Google AI
 ### Beginner
 1. Read **MIGRATION_COMPLETE.md** to see the end result
 2. Review `services/llmService.ts` to see implementation
-3. Try with one provider first (Gemini easiest)
+3. Try with one provider first (OpenRouter recommended for variety)
 
 ### Intermediate
 1. Read **SKILL.md** for architecture details

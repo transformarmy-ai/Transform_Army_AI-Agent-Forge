@@ -2,9 +2,9 @@
 
 ## What Changed
 
-Your Agent Forge application now supports **4 LLM providers** instead of just Google Gemini!
+Your Agent Forge application now supports **3 LLM providers**: OpenAI, Anthropic, and OpenRouter!
 
-### Removed
+### Removed (From Original Google Gemini SDK Implementation)
 - ❌ `@google/genai` npm package and CDN dependency
 - ❌ Google GenAI SDK usage
 
@@ -12,9 +12,10 @@ Your Agent Forge application now supports **4 LLM providers** instead of just Go
 - ✅ **OpenAI** provider (gpt-4o, gpt-4, gpt-3.5, etc.)
 - ✅ **Anthropic** provider (Claude 3.5 Sonnet, Claude 3 Opus, etc.)
 - ✅ **OpenRouter** provider (access to Mistral, Llama, and many other models)
-- ✅ **Gemini** provider (still available via REST API, no SDK needed)
 - ✅ New abstraction layer: `services/llmService.ts`
 - ✅ Unified interface for all providers
+
+**Note**: Gemini support has been removed from the current implementation per user requirements.
 
 ---
 

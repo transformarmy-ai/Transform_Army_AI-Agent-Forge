@@ -15,9 +15,12 @@
 
 ```
 +--------------------------------+       +--------------------------+
-|  React Frontend (Manifest Forge)|<----->|   Google Gemini API      |
+|  React Frontend (Manifest Forge)|<----->| Multi-Provider LLM APIs  |
 |                                |       | (Generation/Normalization)|
-| - Agent Forge UI               |       +--------------------------+
+| - Agent Forge UI               |       | - OpenAI                 |
+|                                |       | - Anthropic              |
+|                                |       | - OpenRouter             |
+|                                |       +--------------------------+
 | - Roster Management            |
 | - Export / Import (ACoC)       |
 +----------+---------------------+
@@ -29,7 +32,7 @@
 
 ```
 
-The application is now a self-contained, client-side tool for interacting with the Gemini API to produce and normalize standardized JSON manifests.
+The application is now a self-contained, client-side tool for interacting with multiple LLM provider APIs (OpenAI, Anthropic, OpenRouter) to produce and normalize standardized JSON manifests.
 
 ---
 

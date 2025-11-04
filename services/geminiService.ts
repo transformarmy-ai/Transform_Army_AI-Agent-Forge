@@ -93,77 +93,74 @@ function parseJSONSafely(jsonString: string): any {
       i++;
     }
     
-    // Try parsing again after removing comments
-    try {
-      return JSON.parse(commentRemoved);
-    } catch (secondError) {
-      console.error('⚠️ [JSON PARSE] Comment removal failed, trying to fix control characters...');
+    // STEP 1: Escape control characters INSIDE strings first (before removing them)
+    let fixed = commentRemoved;
+    inString = false;
+    escaped = false;
+    let controlCharFixed = '';
+    
+    for (let j = 0; j < fixed.length; j++) {
+      const char = fixed[j];
       
-      // Try to fix unescaped control characters in string values
-      // This is a heuristic approach - we'll try to find and escape control chars
-      try {
-        // Use a more aggressive approach: manually parse and fix control characters
-        let fixed = commentRemoved;
-        
-        // Process character by character to properly escape control characters in strings
-        inString = false;
+      if (escaped) {
+        controlCharFixed += char;
         escaped = false;
-        let result = '';
-        
-        for (let j = 0; j < fixed.length; j++) {
-          const char = fixed[j];
-          
-          if (escaped) {
-            result += char;
-            escaped = false;
-            continue;
-          }
-          
-          if (char === '\\') {
-            escaped = true;
-            result += char;
-            continue;
-          }
-          
-          if (char === '"') {
-            inString = !inString;
-            result += char;
-            continue;
-          }
-          
-          if (inString) {
-            // Inside a string, escape control characters
-            if (char === '\n') {
-              result += '\\n';
-            } else if (char === '\r') {
-              result += '\\r';
-            } else if (char === '\t') {
-              result += '\\t';
-            } else if (char === '\f') {
-              result += '\\f';
-            } else if (char === '\b') {
-              result += '\\b';
-            } else if (char.charCodeAt(0) < 32) {
-              // Any other control character
-              result += '\\u' + ('0000' + char.charCodeAt(0).toString(16)).slice(-4);
-            } else {
-              result += char;
-            }
-          } else {
-            result += char;
-          }
-        }
-        
-        return JSON.parse(result);
-      } catch (thirdError) {
-        console.error('❌ [JSON PARSE] All repair attempts failed');
-        console.error('  - Original error:', error instanceof Error ? error.message : String(error));
-        console.error('  - Second error:', secondError instanceof Error ? secondError.message : String(secondError));
-        console.error('  - Third error:', thirdError instanceof Error ? thirdError.message : String(thirdError));
-        console.error('  - Problematic JSON (first 500 chars):', commentRemoved.substring(0, 500));
-        console.error('  - Problematic JSON (last 500 chars):', commentRemoved.substring(Math.max(0, commentRemoved.length - 500)));
-        throw new Error(`Failed to parse JSON response from LLM. Error: ${error instanceof Error ? error.message : String(error)}. The response may contain invalid control characters, JavaScript comments, or malformed JSON.`);
+        continue;
       }
+      
+      if (char === '\\') {
+        escaped = true;
+        controlCharFixed += char;
+        continue;
+      }
+      
+      if (char === '"') {
+        inString = !inString;
+        controlCharFixed += char;
+        continue;
+      }
+      
+      if (inString) {
+        // Inside a string, escape control characters
+        if (char === '\n') {
+          controlCharFixed += '\\n';
+        } else if (char === '\r') {
+          controlCharFixed += '\\r';
+        } else if (char === '\t') {
+          controlCharFixed += '\\t';
+        } else if (char === '\f') {
+          controlCharFixed += '\\f';
+        } else if (char === '\b') {
+          controlCharFixed += '\\b';
+        } else if (char.charCodeAt(0) < 32) {
+          // Any other control character - use unicode escape
+          controlCharFixed += '\\u' + ('0000' + char.charCodeAt(0).toString(16)).slice(-4);
+        } else {
+          controlCharFixed += char;
+        }
+      } else {
+        // Outside strings, keep the character as-is for now
+        controlCharFixed += char;
+      }
+    }
+    
+    // STEP 2: Remove trailing commas before closing braces/brackets
+    let sanitized = controlCharFixed.replace(/,(?=\s*[}\]])/g, '');
+    
+    // STEP 3: Remove any remaining control characters OUTSIDE of strings
+    // (these would be truly malformed JSON at this point)
+    sanitized = sanitized.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '');
+    
+    // Try parsing after all sanitization
+    try {
+      return JSON.parse(sanitized);
+    } catch (secondError) {
+      console.error('❌ [JSON PARSE] All repair attempts failed');
+      console.error('  - Original error:', error instanceof Error ? error.message : String(error));
+      console.error('  - Second error:', secondError instanceof Error ? secondError.message : String(secondError));
+      console.error('  - Problematic JSON (first 500 chars):', sanitized.substring(0, 500));
+      console.error('  - Problematic JSON (last 500 chars):', sanitized.substring(Math.max(0, sanitized.length - 500)));
+      throw new Error(`Failed to parse JSON response from LLM. Error: ${error instanceof Error ? error.message : String(error)}. The response may contain invalid control characters, JavaScript comments, or malformed JSON.`);
     }
   }
 }

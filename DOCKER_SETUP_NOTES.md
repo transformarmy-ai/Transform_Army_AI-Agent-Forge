@@ -39,11 +39,12 @@ Instead of copying `.env` directly, we use Docker's build argument system:
 
 ### `Dockerfile`
 ```dockerfile
-ARG GEMINI_API_KEY       # Accept build argument
-ARG OPENAI_API_KEY
+ARG OPENAI_API_KEY       # Accept build argument
+ARG OPENROUTER_API_KEY
+ARG ANTHROPIC_API_KEY
 # ... etc
 
-RUN echo "GEMINI_API_KEY=${GEMINI_API_KEY}" > .env   # Create .env in container
+RUN echo "OPENAI_API_KEY=${OPENAI_API_KEY}" > .env   # Create .env in container
 RUN npm run build                                       # Vite reads it
 ```
 
@@ -51,14 +52,17 @@ RUN npm run build                                       # Vite reads it
 ```yaml
 build:
   args:
-    GEMINI_API_KEY: ${GEMINI_API_KEY:-}      # Pass value from .env
+    OPENAI_API_KEY: ${OPENAI_API_KEY:-}      # Pass value from .env
+    OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+    ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
     # ... etc
 ```
 
 ### `.env` (local file, not in git)
 ```bash
-GEMINI_API_KEY=sk-your-key-here
 OPENAI_API_KEY=sk-your-key-here
+OPENROUTER_API_KEY=sk-your-key-here
+ANTHROPIC_API_KEY=sk-your-key-here
 # ... etc
 ```
 

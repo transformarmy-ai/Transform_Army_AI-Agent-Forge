@@ -2,7 +2,9 @@
 
 ## Overview
 
-This skill provides a comprehensive guide for migrating any Google AI Studio project from the `@google/genai` SDK to a flexible, multi-provider LLM architecture that supports OpenAI, Anthropic, OpenRouter, and Gemini without SDK dependencies.
+This skill provides a comprehensive guide for migrating any Google AI Studio project from the `@google/genai` SDK to a flexible, multi-provider LLM architecture that supports OpenAI, Anthropic, and OpenRouter via REST APIs.
+
+**Note**: This document is maintained for historical/educational purposes. The current implementation supports OpenAI, Anthropic, and OpenRouter providers.
 
 ---
 

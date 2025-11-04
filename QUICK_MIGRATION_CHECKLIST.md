@@ -32,7 +32,6 @@ grep -r "generateContent" . --include="*.ts" --include="*.tsx"
 - [ ] Create `services/llmService.ts`
 - [ ] Add `LLMProviderInterface`
 - [ ] Add schema converter function
-- [ ] Implement GeminiProvider (REST API)
 - [ ] Implement OpenAIProvider
 - [ ] Implement AnthropicProvider
 - [ ] Implement OpenRouterProvider
@@ -55,7 +54,6 @@ grep -r "generateContent" . --include="*.ts" --include="*.tsx"
 
 ### 4. Update Configuration
 - [ ] Add environment variables to `.env`
-  - [ ] `GEMINI_API_KEY`
   - [ ] `OPENAI_API_KEY`
   - [ ] `OPENROUTER_API_KEY`
   - [ ] `ANTHROPIC_API_KEY`

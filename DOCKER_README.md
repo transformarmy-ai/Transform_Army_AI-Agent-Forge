@@ -89,7 +89,6 @@ To configure API keys:
 
 ```bash
 # Example .env file
-GEMINI_API_KEY=your_gemini_key_here
 OPENAI_API_KEY=your_openai_key_here
 OPENROUTER_API_KEY=your_openrouter_key_here
 ANTHROPIC_API_KEY=your_anthropic_key_here
