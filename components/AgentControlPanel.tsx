@@ -113,7 +113,8 @@ const AgentControlPanel: React.FC<AgentControlPanelProps> = ({
                 {llmProviders.map((provider) => ( <option key={provider} value={provider}>{provider}</option>))}
             </CustomSelect>
              <div className="flex-1 min-w-[150px]">
-                <label className="block text-sm font-medium text-[--color-accent-cyan] mb-1 uppercase tracking-wider font-orbitron">Custom Model Name</label>
+                <label className="block text-sm font-medium text-[--color-accent-red] mb-1 uppercase tracking-wider font-orbitron"
+                       style={{ textShadow: '0 0 8px var(--color-glow-red)' }}>Custom Model Name</label>
                 <input
                     type="text"
                     value={modelName}
@@ -130,9 +131,24 @@ const AgentControlPanel: React.FC<AgentControlPanelProps> = ({
           <div className="mb-6">
               <div className="flex justify-between items-center mb-2">
                 <h3 className="block text-sm font-medium text-[--color-accent-red] uppercase tracking-wider font-orbitron">:: Tool Selection ::</h3>
-                <button onClick={onManageTools} className="flex items-center text-xs text-[--color-text-secondary] hover:text-[--color-accent-red] transition-colors font-mono">
-                    <CogIcon className="h-4 w-4 mr-1" />
-                    Manage Custom Tools
+                <button 
+                  onClick={onManageTools}
+                  onMouseEnter={() => import('../utils/sounds').then(m => m.soundManager.playHover())}
+                  className="flex items-center text-xs text-[--color-text-secondary] hover:text-[--color-accent-red] transition-all duration-200 font-mono relative group"
+                  style={{ 
+                    textShadow: '0 0 0px transparent',
+                  }}
+                  onMouseMove={(e) => {
+                    const button = e.currentTarget;
+                    button.style.textShadow = '0 0 8px var(--color-glow-red)';
+                  }}
+                  onMouseLeave={(e) => {
+                    const button = e.currentTarget;
+                    button.style.textShadow = '0 0 0px transparent';
+                  }}
+                >
+                    <CogIcon className="h-4 w-4 mr-1 group-hover:rotate-90 transition-transform duration-300" />
+                    <span className="group-hover:drop-shadow-[0_0_5px_rgba(220,20,60,0.6)] transition-all duration-200">Manage Custom Tools</span>
                 </button>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2 bg-[--color-bg-tertiary]/50 p-3 rounded-md border border-[--color-border-primary]"
@@ -156,12 +172,24 @@ const AgentControlPanel: React.FC<AgentControlPanelProps> = ({
       <button
         onClick={onGenerate}
         disabled={isLoading}
-        className="w-full flex justify-center items-center bg-gradient-to-r from-[--color-accent-red] to-[--color-accent-blue] hover:from-[--color-accent-red]/90 hover:to-[--color-accent-blue]/90 disabled:from-[--color-text-muted] disabled:to-[--color-text-muted] disabled:cursor-not-allowed text-[--color-text-inverse] font-bold py-3 px-4 rounded-md transition-all duration-300 font-orbitron tracking-wider shadow-lg"
+        onMouseEnter={() => {
+          if (!isLoading) {
+            import('../utils/sounds').then(m => m.soundManager.playHover());
+          }
+        }}
+        onMouseDown={() => {
+          if (!isLoading) {
+            import('../utils/sounds').then(m => m.soundManager.playClick());
+          }
+        }}
+        className="w-full flex justify-center items-center bg-gradient-to-r from-[--color-accent-red] to-[--color-accent-blue] hover:from-[--color-accent-red]/90 hover:to-[--color-accent-blue]/90 disabled:from-[--color-text-muted] disabled:to-[--color-text-muted] disabled:cursor-not-allowed text-[--color-text-inverse] font-bold py-3 px-4 rounded-md transition-all duration-300 font-orbitron tracking-wider shadow-lg relative overflow-hidden group"
         style={{
           boxShadow: '0 4px 20px rgba(220, 20, 60, 0.4), 0 8px 32px rgba(0, 0, 0, 0.6)',
           textShadow: '0 0 10px rgba(255, 255, 255, 0.5)'
         }}
       >
+        <span className="absolute inset-0 bg-gradient-to-r from-[--color-accent-red]/0 via-[--color-accent-blue]/20 to-[--color-accent-red]/0 opacity-0 group-hover:opacity-100 group-hover:animate-pulse transition-opacity duration-300"></span>
+        <span className="relative z-10 group-hover:drop-shadow-[0_0_15px_rgba(220,20,60,0.8)] transition-all duration-300">
         {isLoading ? (
           <>
             <SpinnerIcon className="animate-spin h-5 w-5 mr-3" />
@@ -170,6 +198,7 @@ const AgentControlPanel: React.FC<AgentControlPanelProps> = ({
         ) : (
           'ENGAGE & FORGE MANIFEST'
         )}
+        </span>
       </button>
     </div>
   );

@@ -324,19 +324,27 @@ const App: React.FC = () => {
   };
 
   const WelcomeMessage: React.FC = () => (
-    <div className="text-center p-8 border-2 border-dashed border-[--color-border-accent]/50 rounded-lg h-full flex flex-col justify-center items-center col-span-1 lg:col-span-8 bg-[--color-bg-secondary]/50 backdrop-blur-sm">
-      <h2 className="text-2xl font-orbitron text-[--color-accent-cyan] uppercase tracking-wider mb-4"
-          style={{ textShadow: '0 0 15px var(--color-glow-cyan)' }}>
+    <div className="text-center p-8 border-2 border-dashed border-[--color-accent-red]/40 rounded-lg h-full flex flex-col justify-center items-center col-span-1 lg:col-span-8 bg-[--color-bg-secondary]/50 backdrop-blur-sm relative overflow-hidden"
+         style={{
+           boxShadow: 'inset 0 0 30px rgba(220, 20, 60, 0.1), 0 0 40px rgba(0, 48, 143, 0.1)'
+         }}>
+      <div className="absolute inset-0 bg-gradient-to-br from-[--color-accent-red]/5 via-transparent to-[--color-accent-blue]/5"></div>
+      <h2 className="text-2xl font-orbitron text-[--color-accent-red] uppercase tracking-wider mb-4 relative z-10"
+          style={{ 
+            textShadow: '0 0 20px var(--color-glow-red), 0 0 40px rgba(220, 20, 60, 0.5), 0 0 60px rgba(220, 20, 60, 0.3)',
+            letterSpacing: '0.2em'
+          }}>
         Welcome to the Manifest Forge
       </h2>
-      <p className="mt-2 text-[--color-text-secondary] max-w-lg font-[--font-secondary] leading-relaxed">
-        Use the **Mission Parameters** panel to forge compliant `agent.v1` manifests, or load a pre-configured team from the **Templates** menu in the Mission Roster.
+      <p className="mt-2 text-[--color-text-primary] max-w-lg font-[--font-secondary] leading-relaxed relative z-10"
+         style={{ textShadow: '0 0 10px rgba(255, 255, 255, 0.3)' }}>
+        Use the <strong className="text-[--color-accent-red]">Mission Parameters</strong> panel to forge compliant <code className="text-[--color-accent-blue] bg-[--color-bg-tertiary] px-1 rounded">agent.v1</code> manifests, or load a pre-configured team from the <strong className="text-[--color-accent-blue]">Templates</strong> menu in the Mission Roster.
       </p>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-[--color-bg-primary]" style={{ backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(0, 255, 255, 0.02) 0%, transparent 70%)' }}>
+    <div className="min-h-screen bg-[--color-bg-primary]" style={{ backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(220, 20, 60, 0.03) 0%, transparent 70%)' }}>
       <Header />
       <main className="p-4 md:p-8 max-w-[95rem] mx-auto">
         <div className="mb-8">
@@ -359,7 +367,10 @@ const App: React.FC = () => {
             onLLMProviderChange={(provider) => setSelectedLLMProvider(provider)}
             onModelNameChange={setModelName}
             onToolsChange={handleToolsChange}
-            onGenerate={() => handleGenerateAgent(selectedTeam, selectedRole, selectedLanguage, selectedLLMProvider, modelName, selectedTools)}
+            onGenerate={async () => {
+              await import('./utils/sounds').then(m => m.soundManager.playAction());
+              handleGenerateAgent(selectedTeam, selectedRole, selectedLanguage, selectedLLMProvider, modelName, selectedTools);
+            }}
             onManageTools={() => setIsToolManagerOpen(true)}
             isLoading={isLoading}
             isLoadingMessage={isLoadingMessage}
@@ -378,10 +389,10 @@ const App: React.FC = () => {
           {missionAgents.length === 0 && !isLoading && <WelcomeMessage />}
           
           {isLoading && !isLoadingMessage.includes('FORGING') && (
-             <div className="flex flex-col justify-center items-center h-full text-[--color-accent-cyan] col-span-1 lg:col-span-12">
-                <SpinnerIcon className="animate-spin h-12 w-12 mb-4" style={{ filter: 'drop-shadow(0 0 10px var(--color-glow-cyan))' }} />
+             <div className="flex flex-col justify-center items-center h-full text-[--color-accent-red] col-span-1 lg:col-span-12">
+                <SpinnerIcon className="animate-spin h-12 w-12 mb-4" style={{ filter: 'drop-shadow(0 0 15px var(--color-glow-red))' }} />
                 <p className="text-xl font-orbitron tracking-widest uppercase"
-                   style={{ textShadow: '0 0 15px var(--color-glow-cyan)' }}>
+                   style={{ textShadow: '0 0 20px var(--color-glow-red), 0 0 40px rgba(220, 20, 60, 0.4)' }}>
                    {isLoadingMessage || "PROCESSING..."}
                 </p>
             </div>

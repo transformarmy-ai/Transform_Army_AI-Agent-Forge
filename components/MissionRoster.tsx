@@ -33,7 +33,7 @@ const MissionRoster: React.FC<MissionRosterProps> = ({
     switch (team) {
       case 'Red': return 'border-[--color-accent-red]';
       case 'Blue': return 'border-[--color-accent-blue]';
-      case 'System': return 'border-[--color-accent-cyan]';
+      case 'System': return 'border-[--color-accent-red]';
       default: return 'border-[--color-text-muted]';
     }
   };
@@ -54,13 +54,37 @@ const MissionRoster: React.FC<MissionRosterProps> = ({
   const IconButton: React.FC<{onClick: () => void, disabled: boolean, title: string, children: React.ReactNode }> =
     ({onClick, disabled, title, children}) => (
         <button
-            onClick={onClick}
+            onClick={() => {
+              if (!disabled) {
+                import('../utils/sounds').then(m => m.soundManager.playClick());
+                onClick();
+              }
+            }}
+            onMouseEnter={() => {
+              if (!disabled) {
+                import('../utils/sounds').then(m => m.soundManager.playHover());
+              }
+            }}
             disabled={disabled}
             title={title}
-            className="text-[--color-text-secondary] hover:text-[--color-accent-cyan] transition-all duration-200 disabled:text-[--color-text-muted] disabled:cursor-not-allowed hover:scale-110"
-            style={{ textShadow: disabled ? 'none' : '0 0 5px var(--color-glow-cyan)' }}
+            className="text-[--color-text-secondary] hover:text-[--color-accent-red] transition-all duration-200 disabled:text-[--color-text-muted] disabled:cursor-not-allowed hover:scale-110 relative group"
+            style={{ textShadow: disabled ? 'none' : '0 0 0px transparent' }}
+            onMouseMove={(e) => {
+              if (!disabled) {
+                const button = e.currentTarget;
+                button.style.textShadow = '0 0 10px var(--color-glow-red)';
+                button.style.filter = 'drop-shadow(0 0 8px rgba(220, 20, 60, 0.6))';
+              }
+            }}
+            onMouseLeave={(e) => {
+              const button = e.currentTarget;
+              button.style.textShadow = '0 0 0px transparent';
+              button.style.filter = 'none';
+            }}
         >
-            {children}
+            <span className="group-hover:drop-shadow-[0_0_8px_rgba(220,20,60,0.8)] transition-all duration-200">
+              {children}
+            </span>
         </button>
   );
 
@@ -80,7 +104,24 @@ const MissionRoster: React.FC<MissionRosterProps> = ({
                         <div className="p-2">
                             <p className="text-xs text-[--color-text-med] px-2 pb-1">Load a pre-configured team:</p>
                             {MISSION_TEMPLATES.map(template => (
-                                <button key={template.name} onClick={() => handleTemplateSelect(template)} className="w-full text-left px-2 py-2 text-sm text-[--color-text-light] hover:bg-[--color-accent-red]/50 rounded">
+                                <button 
+                                  key={template.name} 
+                                  onClick={() => {
+                                    import('../utils/sounds').then(m => m.soundManager.playClick());
+                                    handleTemplateSelect(template);
+                                  }}
+                                  onMouseEnter={() => import('../utils/sounds').then(m => m.soundManager.playHover())}
+                                  className="w-full text-left px-2 py-2 text-sm text-[--color-text-light] hover:bg-[--color-accent-red]/50 rounded transition-all duration-200 relative group"
+                                  style={{ textShadow: '0 0 0px transparent' }}
+                                  onMouseMove={(e) => {
+                                    const button = e.currentTarget;
+                                    button.style.textShadow = '0 0 8px var(--color-glow-red)';
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    const button = e.currentTarget;
+                                    button.style.textShadow = '0 0 0px transparent';
+                                  }}
+                                >
                                     <p className="font-bold">{template.name}</p>
                                     <p className="text-xs text-[--color-text-med]">{template.description}</p>
                                 </button>

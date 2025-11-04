@@ -24,25 +24,94 @@ function parseJSONSafely(jsonString: string): any {
       cleaned = cleaned.substring(firstBrace, lastBrace + 1);
     }
     
-    // Try parsing again after cleaning
+    // Remove JavaScript-style comments (both // and /* */)
+    // We need to be careful to only remove comments outside of strings
+    let commentRemoved = '';
+    let inString = false;
+    let escaped = false;
+    let i = 0;
+    
+    while (i < cleaned.length) {
+      const char = cleaned[i];
+      const nextChar = i + 1 < cleaned.length ? cleaned[i + 1] : '';
+      
+      if (escaped) {
+        commentRemoved += char;
+        escaped = false;
+        i++;
+        continue;
+      }
+      
+      if (char === '\\') {
+        escaped = true;
+        commentRemoved += char;
+        i++;
+        continue;
+      }
+      
+      if (char === '"') {
+        inString = !inString;
+        commentRemoved += char;
+        i++;
+        continue;
+      }
+      
+      if (!inString) {
+        // Check for single-line comment //
+        if (char === '/' && nextChar === '/') {
+          // Skip until end of line
+          while (i < cleaned.length && cleaned[i] !== '\n' && cleaned[i] !== '\r') {
+            i++;
+          }
+          // Skip the newline character(s) too
+          if (i < cleaned.length) {
+            if (cleaned[i] === '\r' && i + 1 < cleaned.length && cleaned[i + 1] === '\n') {
+              i += 2; // Handle \r\n
+            } else if (cleaned[i] === '\n' || cleaned[i] === '\r') {
+              i++; // Handle \n or \r
+            }
+          }
+          continue;
+        }
+        
+        // Check for multi-line comment /* */
+        if (char === '/' && nextChar === '*') {
+          // Skip until we find */
+          i += 2;
+          while (i < cleaned.length) {
+            if (cleaned[i] === '*' && i + 1 < cleaned.length && cleaned[i + 1] === '/') {
+              i += 2;
+              break;
+            }
+            i++;
+          }
+          continue;
+        }
+      }
+      
+      commentRemoved += char;
+      i++;
+    }
+    
+    // Try parsing again after removing comments
     try {
-      return JSON.parse(cleaned);
+      return JSON.parse(commentRemoved);
     } catch (secondError) {
-      console.error('⚠️ [JSON PARSE] Repair attempt failed, trying to fix control characters...');
+      console.error('⚠️ [JSON PARSE] Comment removal failed, trying to fix control characters...');
       
       // Try to fix unescaped control characters in string values
       // This is a heuristic approach - we'll try to find and escape control chars
       try {
         // Use a more aggressive approach: manually parse and fix control characters
-        let fixed = cleaned;
+        let fixed = commentRemoved;
         
         // Process character by character to properly escape control characters in strings
-        let inString = false;
-        let escaped = false;
+        inString = false;
+        escaped = false;
         let result = '';
         
-        for (let i = 0; i < fixed.length; i++) {
-          const char = fixed[i];
+        for (let j = 0; j < fixed.length; j++) {
+          const char = fixed[j];
           
           if (escaped) {
             result += char;
@@ -91,9 +160,9 @@ function parseJSONSafely(jsonString: string): any {
         console.error('  - Original error:', error instanceof Error ? error.message : String(error));
         console.error('  - Second error:', secondError instanceof Error ? secondError.message : String(secondError));
         console.error('  - Third error:', thirdError instanceof Error ? thirdError.message : String(thirdError));
-        console.error('  - Problematic JSON (first 500 chars):', cleaned.substring(0, 500));
-        console.error('  - Problematic JSON (last 500 chars):', cleaned.substring(Math.max(0, cleaned.length - 500)));
-        throw new Error(`Failed to parse JSON response from LLM. Error: ${error instanceof Error ? error.message : String(error)}. The response may contain invalid control characters or malformed JSON.`);
+        console.error('  - Problematic JSON (first 500 chars):', commentRemoved.substring(0, 500));
+        console.error('  - Problematic JSON (last 500 chars):', commentRemoved.substring(Math.max(0, commentRemoved.length - 500)));
+        throw new Error(`Failed to parse JSON response from LLM. Error: ${error instanceof Error ? error.message : String(error)}. The response may contain invalid control characters, JavaScript comments, or malformed JSON.`);
       }
     }
   }
