@@ -7,11 +7,21 @@ import OrchestratorChatbox from '../components/OrchestratorChatbox';
 import { getOrchestratorService } from '../services/orchestratorService';
 
 const MissionControl: React.FC = () => {
-  const { mission, setOrchestratorConnectionStatus, addLogEntry } = useMission();
+  const { mission, startMission, setOrchestratorConnectionStatus, addLogEntry } = useMission();
   const [isChatboxOpen, setIsChatboxOpen] = React.useState(false);
   const orchestratorServiceRef = useRef(getOrchestratorService());
 
   useEffect(() => {
+    // Initialize mission if not already created
+    if (!mission) {
+      startMission('Active Mission', 'Real-time agent orchestration and monitoring');
+    }
+  }, [mission, startMission]);
+
+  useEffect(() => {
+    // Only initialize orchestrator connection if mission exists
+    if (!mission) return;
+
     // Initialize Orchestrator connection
     const orchestrator = orchestratorServiceRef.current;
     const unsubscribe = orchestrator.onConnectionStatusChange((status) => {
@@ -29,7 +39,7 @@ const MissionControl: React.FC = () => {
     return () => {
       unsubscribe();
     };
-  }, [setOrchestratorConnectionStatus, addLogEntry]);
+  }, [mission, setOrchestratorConnectionStatus, addLogEntry]);
 
   const handleSendOrchestratorMessage = async (message: string) => {
     try {

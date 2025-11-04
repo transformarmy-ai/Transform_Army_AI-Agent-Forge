@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Mission } from '../../contexts/MissionContext';
+import { Mission } from '../../context/MissionContext';
 
 interface AnalyticsDashboardProps {
   mission: Mission;
