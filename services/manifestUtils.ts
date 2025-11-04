@@ -100,6 +100,68 @@ export function enforceACoCRules(manifest: any): { manifest: AgentV1; changes: s
     changes.push('Added default external memory block');
   }
 
+  // Ensure language block
+  if (!m.language) {
+    m.language = { name: 'Python', version: '3.11' };
+    changes.push('Added default language block (Python 3.11)');
+  } else {
+    if (!m.language.name) {
+      m.language.name = 'Python';
+      changes.push('Set language.name to default: Python');
+    }
+    if (!m.language.version) {
+      const lang = String(m.language.name).toLowerCase();
+      m.language.version = lang.includes('python') ? '3.11'
+        : lang.includes('javascript') || lang.includes('node') ? '20.x'
+        : lang.includes('go') ? '1.22'
+        : lang.includes('rust') ? '1.77'
+        : '1.0.0';
+      changes.push(`Set language.version to default for ${m.language.name}: ${m.language.version}`);
+    }
+  }
+
+  // Ensure execution block
+  if (!m.execution) {
+    m.execution = { kind: 'process' };
+    const lang = String(m.language?.name || '').toLowerCase();
+    if (lang.includes('python')) {
+      m.execution.command = 'python';
+      m.execution.args = ['main.py'];
+    } else if (lang.includes('javascript') || lang.includes('node')) {
+      m.execution.command = 'node';
+      m.execution.args = ['index.js'];
+    } else if (lang.includes('go')) {
+      m.execution.command = './main';
+      m.execution.args = [];
+    } else if (lang.includes('rust')) {
+      m.execution.command = './main';
+      m.execution.args = [];
+    } else {
+      m.execution.command = 'python';
+      m.execution.args = ['main.py'];
+    }
+    changes.push('Added default execution block based on language');
+  } else {
+    if (!m.execution.kind) {
+      m.execution.kind = 'process';
+      changes.push('Set execution.kind to default: process');
+    }
+    if (!m.execution.command) {
+      const lang = String(m.language?.name || '').toLowerCase();
+      if (lang.includes('python')) m.execution.command = 'python';
+      else if (lang.includes('javascript') || lang.includes('node')) m.execution.command = 'node';
+      else m.execution.command = './main';
+      changes.push(`Set execution.command to default for ${m.language?.name || 'unknown language'}`);
+    }
+    if (!Array.isArray(m.execution.args)) {
+      const lang = String(m.language?.name || '').toLowerCase();
+      if (lang.includes('python')) m.execution.args = ['main.py'];
+      else if (lang.includes('javascript') || lang.includes('node')) m.execution.args = ['index.js'];
+      else m.execution.args = [];
+      changes.push('Set execution.args to default');
+    }
+  }
+
   // Ensure env exists
   if (!m.env) {
     m.env = { required: [], optional: [] };
@@ -132,6 +194,17 @@ export function enforceACoCRules(manifest: any): { manifest: AgentV1; changes: s
       }
     ];
     changes.push('Added default smoke test');
+  }
+
+  // Ensure each tool has a minimal inputSchema
+  if (Array.isArray(m.tools)) {
+    m.tools = m.tools.map((t: any, idx: number) => {
+      if (t && !t.inputSchema) {
+        t.inputSchema = { type: 'object', properties: {}, required: [] };
+        changes.push(`Added default inputSchema to tools[${idx}]`);
+      }
+      return t;
+    });
   }
 
   // Default temperature if missing
