@@ -27,3 +27,57 @@ services:
       - "com.transformarmyai.service=agent-forge"
       - "com.transformarmyai.description=Agent Forge Web UI"
 
+  api:
+    build:
+      context: ./backend
+    container_name: transform-army-api
+    environment:
+      - PORT=3000
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/transform_army
+      - REDIS_URL=redis://redis:6379
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - LMSTUDIO_BASE_URL=${LMSTUDIO_BASE_URL}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+      - redis
+    restart: unless-stopped
+
+  db:
+    image: postgres:15
+    container_name: transform-army-db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=transform_army
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  redis:
+    image: redis:7
+    container_name: transform-army-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  chroma:
+    image: chromadb/chroma:latest
+    container_name: transform-army-chroma
+    environment:
+      - CHROMA_SERVER_HOST=0.0.0.0
+      - CHROMA_SERVER_PORT=8000
+      - ANONYMIZED_TELEMETRY=false
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma_data:/chroma/.chroma
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  chroma_data:
+
