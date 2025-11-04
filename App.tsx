@@ -15,6 +15,7 @@ import ToolboxManager from './components/ToolboxManager';
 import OrchestratorChatbox from './components/OrchestratorChatbox';
 import { getOrchestratorService } from './services/orchestratorService';
 import { getSlackIntegration } from './services/slackIntegration';
+import { useMission } from './context/MissionContext';
 
 
 export interface MissionLogEntry {
@@ -66,6 +67,8 @@ const App: React.FC<AppProps> = ({ onNavigate }) => {
   const [isChatboxOpen, setIsChatboxOpen] = useState(false);
   const [orchestratorConnectionStatus, setOrchestratorConnectionStatus] = useState<'connected' | 'connecting' | 'disconnected'>('disconnected');
   const orchestratorServiceRef = useRef(getOrchestratorService());
+
+  const { mission, addAgent, addLogEntry: addContextLogEntry, startMission } = useMission();
 
 
   useEffect(() => {
@@ -190,13 +193,26 @@ const App: React.FC<AppProps> = ({ onNavigate }) => {
       
       const profile = await generateAgentWithRetry(team, role, language, llmProvider, model, tools, allCustomTools, 3);
 
+      // Add to local state
       setMissionAgents(prevAgents => [...prevAgents, profile]);
-      addLogEntry("AgentForge", `Successfully forged manifest: ${profile.manifest.name}.`, profile.manifest);
+      
+      // Add to MissionContext for Mission Control persistence
+      addAgent(profile);
+      
+      // Initialize mission if not already created
+      if (!mission) {
+        startMission('Active Mission', 'Real-time agent orchestration and monitoring');
+      }
+      
+      // Add log entry via context as well
+      addContextLogEntry("AgentForge", `Forged manifest: ${profile.manifest.name}.`, 'success');
+      
       setActiveDetailView(profile);
-    } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
+      addLogEntry("System", `Agent manifest forged successfully: ${profile.manifest.name}`);
+    } catch (e) {
+      const errorMessage = e instanceof Error ? e.message : "An unknown error occurred.";
+      addLogEntry("System Error", `Failed to forge agent manifest. Error: ${errorMessage}`);
       setError(errorMessage);
-      addLogEntry("System Error", errorMessage);
     } finally {
       setIsLoading(false);
       setIsLoadingMessage('');
@@ -360,16 +376,24 @@ const App: React.FC<AppProps> = ({ onNavigate }) => {
             );
             newAgents.push(profile);
             addLogEntry("AgentForge", `(Template) Forged manifest: ${profile.manifest.name}.`);
+            // Add each agent to MissionContext immediately
+            addAgent(profile);
         }
         setMissionAgents(newAgents);
         if (newAgents.length > 0) {
             setActiveDetailView(newAgents[newAgents.length - 1]);
+            // Initialize mission if not already created
+            if (!mission) {
+              startMission(template.name, `Loaded from template: ${template.name}`);
+            }
         }
         addLogEntry("System", `Mission template "${template.name}" loaded successfully.`);
       } catch(e) {
           const errorMessage = e instanceof Error ? e.message : "An unknown error occurred.";
           addLogEntry("System Error", `Failed to forge agent from template. Error: ${errorMessage}. Aborting.`);
           setMissionAgents(newAgents); // Still add the ones that succeeded
+          // Also add succeeded agents to context
+          newAgents.forEach(agent => addAgent(agent));
       } finally {
         setIsLoading(false);
         setIsLoadingMessage('');
