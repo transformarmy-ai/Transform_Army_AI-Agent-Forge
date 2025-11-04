@@ -44,7 +44,7 @@ const EditAgentModal: React.FC<EditAgentModalProps> = ({ agent, onClose, onSave,
             value={value}
             onChange={(e) => onChange(e.target.value)}
             rows={rows}
-            className="w-full bg-[--color-bg-dark-brown]/80 border border-[--color-bg-light-brown] text-[--color-text-light] rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-[--color-accent-gold] font-mono text-sm"
+            className="w-full bg-[--color-bg-dark-brown] border border-[--color-bg-light-brown] text-white placeholder:text-[--color-text-secondary] rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-[--color-accent-gold] font-mono text-sm"
         />
     </div>
   );
@@ -56,7 +56,7 @@ const EditAgentModal: React.FC<EditAgentModalProps> = ({ agent, onClose, onSave,
             type="text"
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            className="w-full bg-[--color-bg-dark-brown]/80 border border-[--color-bg-light-brown] text-[--color-text-light] rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-[--color-accent-gold] font-mono text-sm"
+            className="w-full bg-[--color-bg-dark-brown] border border-[--color-bg-light-brown] text-white placeholder:text-[--color-text-secondary] rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-[--color-accent-gold] font-mono text-sm"
         />
     </div>
   );
