@@ -28,20 +28,20 @@ CHROMA_PORT=8000
 ```
 
 ## Minimal API usage (HTTP)
-Chroma exposes an HTTP API; typical flow:
+Chroma exposes an HTTP API (v2); typical flow:
 1) Create collection
 2) Upsert embeddings/documents
 3) Query similar items
 
 Example (curl):
 ```bash
-# Create collection
-curl -s -X POST "http://localhost:8000/api/v1/collections" \
+# Create collection (v2)
+curl -s -X POST "http://localhost:8000/api/v2/collections" \
   -H 'Content-Type: application/json' \
   -d '{"name":"mission-memory"}'
 
-# List collections
-curl -s http://localhost:8000/api/v1/collections
+# List collections (v2)
+curl -s http://localhost:8000/api/v2/collections
 ```
 
 Note: Chroma expects embeddings provided by you (OpenAI, local models, etc.). In a later phase we can add an embedding service (OpenAI or local) and backend endpoints that accept raw text, embed it, and upsert to Chroma automatically.

@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useMission } from '../../context/MissionContext';
 import { AgentStatus } from '../../types';
 
 const AgentMonitor: React.FC = () => {
-  const { mission, selectAgent } = useMission();
+  const { mission, selectAgent, removeAgent, clearAgents, addLogEntry } = useMission();
   const [expandedAgent, setExpandedAgent] = useState<string | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   if (!mission) {
     return (
@@ -33,20 +34,106 @@ const AgentMonitor: React.FC = () => {
     return (statusOrder[a.status as any] || 3) - (statusOrder[b.status as any] || 3);
   });
 
+  // Matrix rain background scoped to roster panel
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let animationFrameId: number;
+    let columns = 0;
+    let fontSize = 14;
+    let drops: number[] = [];
+    const glyphs = '01';
+
+    const resize = () => {
+      const parent = canvas.parentElement as HTMLElement;
+      const dpr = window.devicePixelRatio || 1;
+      const width = parent.clientWidth;
+      const height = parent.clientHeight;
+      canvas.width = Math.floor(width * dpr);
+      canvas.height = Math.floor(height * dpr);
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      fontSize = Math.max(12, Math.floor(width / 50));
+      columns = Math.max(1, Math.floor(width / fontSize));
+      drops = Array.from({ length: columns }, () => Math.floor(Math.random() * -20));
+      ctx.font = `${fontSize}px monospace`;
+    };
+
+    const draw = () => {
+      const parent = canvas.parentElement as HTMLElement;
+      const width = parent.clientWidth;
+      const height = parent.clientHeight;
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+      ctx.fillRect(0, 0, width, height);
+      ctx.fillStyle = 'rgba(220, 20, 60, 0.6)'; // crimson
+
+      for (let i = 0; i < columns; i++) {
+        const text = glyphs[Math.floor(Math.random() * glyphs.length)];
+        const x = i * fontSize;
+        const y = drops[i] * fontSize;
+        if (y >= -fontSize && y <= height + fontSize) {
+          ctx.fillText(text, x, y);
+        }
+        if (y > height && Math.random() > 0.975) {
+          drops[i] = Math.floor(Math.random() * -20);
+        }
+        drops[i]++;
+      }
+      animationFrameId = requestAnimationFrame(draw);
+    };
+
+    resize();
+    draw();
+    const onResize = () => {
+      resize();
+    };
+    window.addEventListener('resize', onResize);
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      window.removeEventListener('resize', onResize);
+    };
+  }, []);
+
   return (
     <div className="h-full flex flex-col bg-[--color-bg-secondary] border-r border-[--color-border-primary] overflow-hidden">
       {/* Header */}
-      <div className="px-4 py-3 bg-gradient-to-r from-[--color-bg-secondary] to-[--color-bg-elevated] border-b border-[--color-border-primary]">
-        <h2 className="text-lg font-orbitron font-bold text-[--color-accent-red]" style={{ textShadow: '0 0 10px var(--color-glow-red)' }}>
-          AGENT ROSTER
-        </h2>
-        <p className="text-xs text-[--color-text-muted] mt-1">
-          {mission.agents.length} agents deployed
-        </p>
+      <div className="px-4 py-3 bg-gradient-to-r from-[--color-bg-secondary] to-[--color-bg-elevated] border-b border-[--color-border-primary] flex items-center justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-orbitron font-bold text-[--color-accent-red]" style={{ textShadow: '0 0 10px var(--color-glow-red)' }}>
+            AGENT ROSTER
+          </h2>
+          <p className="text-xs text-[--color-text-muted] mt-1">
+            {mission.agents.length} agents deployed
+          </p>
+        </div>
+        <button
+          className="px-2 py-1 text-xs rounded border border-red-500 text-red-400 hover:bg-red-900/20 transition-colors"
+          title="Clear all agents"
+          onClick={() => {
+            if (mission.agents.length === 0) return;
+            if (window.confirm('Remove ALL agents from this mission?')) {
+              clearAgents();
+              addLogEntry('System', 'All agents cleared from mission', 'warning');
+              setExpandedAgent(null);
+            }
+          }}
+        >
+          🗑 Clear All
+        </button>
       </div>
 
-      {/* Agents List */}
-      <div className="flex-1 overflow-y-auto space-y-2 p-3">
+      {/* Agents List with Matrix background */}
+      <div className="relative flex-1 overflow-y-auto space-y-2 p-3">
+        {/* Matrix Canvas Background */}
+        <canvas
+          ref={canvasRef}
+          className="absolute inset-0 -z-10 opacity-15 pointer-events-none"
+          aria-hidden="true"
+        />
         {mission.agents.length === 0 ? (
           <div className="flex items-center justify-center h-full text-[--color-text-muted] text-sm">
             <p>No agents deployed yet</p>
@@ -131,6 +218,19 @@ const AgentMonitor: React.FC = () => {
                         title="Terminate agent"
                       >
                         ⏹ Stop
+                      </button>
+                      <button
+                        className="flex-1 px-2 py-1 bg-[--color-bg-primary] border border-red-600 text-red-400 hover:bg-red-900/20 rounded text-xs font-semibold transition-colors"
+                        title="Delete agent from mission"
+                        onClick={() => {
+                          if (window.confirm(`Remove agent "${agent.manifest.name}" from mission?`)) {
+                            removeAgent(agent.id);
+                            addLogEntry('System', `Agent removed: ${agent.manifest.name}`, 'warning');
+                            if (expandedAgent === agent.id) setExpandedAgent(null);
+                          }
+                        }}
+                      >
+                        🗑 Delete
                       </button>
                     </div>
                   </div>

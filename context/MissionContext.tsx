@@ -29,6 +29,7 @@ interface MissionContextType {
   setMission: (mission: Mission | null) => void;
   addAgent: (agent: AgentProfile) => void;
   removeAgent: (agentId: string) => void;
+  clearAgents: () => void;
   updateAgentStatus: (agentId: string, status: string) => void;
   addLogEntry: (source: string, content: string, severity?: 'info' | 'warning' | 'error' | 'success', data?: any) => void;
   clearLogs: () => void;
@@ -99,6 +100,16 @@ export const MissionProvider: React.FC<{ children: React.ReactNode }> = ({ child
       return {
         ...prev,
         agents: prev.agents.filter(a => a.id !== agentId),
+      };
+    });
+  }, []);
+
+  const clearAgents = useCallback(() => {
+    setMission(prev => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        agents: [],
       };
     });
   }, []);
@@ -211,6 +222,7 @@ export const MissionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setMission,
     addAgent,
     removeAgent,
+    clearAgents,
     updateAgentStatus,
     addLogEntry,
     clearLogs,

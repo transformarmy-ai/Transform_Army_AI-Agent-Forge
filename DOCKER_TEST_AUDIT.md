@@ -48,7 +48,7 @@ docker logs transform-army-api --tail=50
 - API: GET http://localhost:3000/api/missions/status (200 JSON)
 - DB: `pg_isready -U postgres -d transform_army` (healthy)
 - Redis: `redis-cli ping` → PONG (healthy)
-- Chroma: GET http://localhost:8000/api/v1/collections (200) [optional]
+- Chroma: GET http://localhost:8000/api/v2/collections (200) [optional]
 
 ## Connectivity tests
 ```bash
@@ -75,7 +75,7 @@ npx wscat -c ws://localhost:3000
 - Frontend unhealthy:
   - Confirm /health endpoint returns 200 (nginx.conf included)
 - Chroma not healthy:
-  - Check `docker logs transform-army-chroma`, then GET `/api/v1/collections`
+  - Check `docker logs transform-army-chroma`, then GET `/api/v2/collections`
 
 ## Production Notes
 - Disable `synchronize: true` for TypeORM and use migrations

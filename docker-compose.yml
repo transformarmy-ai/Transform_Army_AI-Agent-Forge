@@ -95,7 +95,7 @@ services:
       - chroma_data:/chroma/.chroma
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000/api/v1/collections"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000/api/v2/collections"]
       interval: 30s
       timeout: 10s
       retries: 5
