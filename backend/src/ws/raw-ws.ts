@@ -1,5 +1,5 @@
 import { Server as HttpServer } from 'http';
-import { WebSocketServer } from 'ws';
+import { WebSocketServer, WebSocket } from 'ws';
 import { randomUUID } from 'crypto';
 
 type OrchestratorAction = 'list-agents' | 'dispatch-task' | 'get-status' | 'get-logs' | 'cancel-task' | 'custom-command';
@@ -23,9 +23,9 @@ interface OrchestratorResponse {
 export function attachRawWs(server: HttpServer) {
   const wss = new WebSocketServer({ server });
 
-  wss.on('connection', (ws) => {
+  wss.on('connection', (ws: WebSocket) => {
     // No-op welcome; frontend tracks status via connection open
-    ws.on('message', (data) => {
+    ws.on('message', (data: WebSocket.RawData) => {
       try {
         const req: OrchestratorRequest = JSON.parse(String(data));
         const base: Omit<OrchestratorResponse, 'id'> = {
