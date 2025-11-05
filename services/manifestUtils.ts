@@ -100,6 +100,19 @@ export function enforceACoCRules(manifest: any): { manifest: AgentV1; changes: s
     changes.push('Added default external memory block');
   }
 
+  // Normalize language if provided as a string
+  if (typeof m.language === 'string') {
+    const langName = m.language;
+    const lower = String(langName).toLowerCase();
+    const inferredVersion = lower.includes('python') ? '3.11'
+      : (lower.includes('javascript') || lower.includes('node')) ? '20.x'
+      : lower.includes('go') ? '1.22'
+      : lower.includes('rust') ? '1.77'
+      : '1.0.0';
+    m.language = { name: langName, version: inferredVersion };
+    changes.push(`Coerced language string to object: {name: ${langName}, version: ${inferredVersion}}`);
+  }
+
   // Ensure language block
   if (!m.language) {
     m.language = { name: 'Python', version: '3.11' };
